@@ -1,0 +1,14 @@
+target/
+.settings/
+.classpath
+.project
+build/
+*.iml
+.idea/
+.groovy/
+temp/
+keys/
+datalogs/
+jetty-web.xml
+.DS_Store
+.pydevproject
