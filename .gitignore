@@ -3,8 +3,6 @@ target/
 .classpath
 .project
 build/
-*.iml
-.idea/
 .groovy/
 temp/
 keys/
