@@ -14,10 +14,10 @@ import jmplib.annotations.ExcludeFromJMPLib;
 import jmplib.annotations.NoRedirect;
 import jmplib.asm.visitor.ClassCacherVisitor;
 import jmplib.classversions.VersionClass;
+import jmplib.config.JMPlibConfig;
 import jmplib.exceptions.ClassNotEditableException;
 import jmplib.exceptions.StructuralIntercessionException;
 import jmplib.util.FileUtils;
-import jmplib.util.PathConstants;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Opcodes;
@@ -42,9 +42,8 @@ import com.github.javaparser.ast.type.ClassOrInterfaceType;
 
 /**
  * This class is a cache of the source code of the application classes.
- * 
+ *
  * @author Ignacio Lagartos, Jose Manuel Redondo
- * 
  */
 @ExcludeFromJMPLib
 public class SourceCodeCache {
@@ -60,7 +59,7 @@ public class SourceCodeCache {
 	 */
 	private SourceCodeCache() {
 		// Pointing to gen folder
-		File file = new File(PathConstants.MODIFIED_SRC_PATH);
+		File file = new File(JMPlibConfig.getInstance().getModifiedSrcPath());
 		if (file.exists()) {
 			// deleting the previous executions contents
 			FileUtils.deleteFile(file);
@@ -71,7 +70,7 @@ public class SourceCodeCache {
 
 	/**
 	 * Returns the unique instance of the class ready to use.
-	 * 
+	 *
 	 * @return Returns the unique instance of the class.
 	 */
 	public static SourceCodeCache getInstance() {
@@ -85,9 +84,8 @@ public class SourceCodeCache {
 	/**
 	 * Obtains the {@link ClassContent} of the specified class from the cache.
 	 * If this class content isn't in the cache, then it is added and returned.
-	 * 
-	 * @param clazz
-	 *            to obtain the {@link ClassContent}
+	 *
+	 * @param clazz to obtain the {@link ClassContent}
 	 * @return the {@link ClassContent} of the class given
 	 * @throws StructuralIntercessionException
 	 */
@@ -107,11 +105,10 @@ public class SourceCodeCache {
 
 	/**
 	 * Provides the current version of one class
-	 * 
-	 * @param className
-	 *            The full name of the class
+	 *
+	 * @param className The full name of the class
 	 * @return The actual version of the class. If the class doesn't have
-	 *         versions returns 0. If the class is not in the cache returns -1.
+	 * versions returns 0. If the class is not in the cache returns -1.
 	 */
 	public int getVersion(String className) {
 		int hashcode = className.hashCode();
@@ -124,12 +121,10 @@ public class SourceCodeCache {
 
 	/**
 	 * This method caches the class into the cache.
-	 * 
-	 * @param clazz
-	 *            The class to be cached.
+	 *
+	 * @param clazz The class to be cached.
 	 * @throws StructuralIntercessionException
-	 * @throws ClassNotEditableException
-	 *             When the class doesn't have accessible source code file.
+	 * @throws ClassNotEditableException When the class doesn't have accessible source code file.
 	 */
 	private void addClass(Class<?> clazz) throws ClassNotEditableException,
 			StructuralIntercessionException {
@@ -191,9 +186,8 @@ public class SourceCodeCache {
 
 	/**
 	 * Creates all auxiliary members to support the JMPlib functionality
-	 * 
-	 * @param clazz
-	 *            The class to instrument
+	 *
+	 * @param clazz The class to instrument
 	 * @return The list of members needed to support JMPlib versioning
 	 */
 	private Collection<BodyDeclaration> getAuxiliaryDeclarations(Class<?> clazz) {
@@ -256,49 +250,44 @@ public class SourceCodeCache {
 	 * Returns the new java file with the path of the 0 version. This path will
 	 * be use to generate the real version paths. On the other hand, this method
 	 * creates the folders needed to place this version files.
-	 * 
-	 * @param clazz
-	 *            The class which version is created.
-	 * @param newName
-	 *            The name of the new version (ie. MyClass_NewVersion_23)
+	 *
+	 * @param clazz The class which version is created.
+	 * @param newName The name of the new version (ie. MyClass_NewVersion_23)
 	 * @return Return the {@link File} where the source code will be written.
-	 * @throws IOException
-	 *             If any I/O error occurs creating the file this exception is
-	 *             thrown.
+	 * @throws IOException If any I/O error occurs creating the file this exception is
+	 * thrown.
 	 */
 	private File createFile(Class<?> clazz, String newName) {
 		/*
 		 * Creating the folders that represent the packages of the class. This
 		 * is needed to differ between classes with the same name.
 		 */
-		File folders = new File(PathConstants.MODIFIED_SRC_PATH
-				+ clazz.getPackage().getName().replace('.', '\\'));
+		String modifiedSrcPath = JMPlibConfig.getInstance().getModifiedSrcPath();
+		File folders = new File(modifiedSrcPath.concat(clazz.getPackage().getName()
+				.replace('.', '/')));
 		folders.mkdirs();
 		// Creating the source code file
-		File sourceFile = new File(folders.getPath() + "\\" + newName + ".java");
-		return sourceFile;
+		String classPathFormat = "%s/%s.java";
+		return new File(String.format(classPathFormat, folders.getPath(), newName));
 	}
 
 	/**
 	 * Return the java file of the given class
-	 * 
-	 * @param clazz
-	 *            This is the class to obtain the source code file.
+	 *
+	 * @param clazz This is the class to obtain the source code file.
 	 * @return Return a {@link File} with the source code of the class.
-	 * @throws ClassNotEditableException
-	 *             If the file doesn't exist the class isn't editable.
+	 * @throws ClassNotEditableException If the file doesn't exist the class isn't editable.
 	 * @throws StructuralIntercessionException
 	 */
 	private File loadJavaFile(Class<?> clazz) throws ClassNotEditableException,
 			StructuralIntercessionException {
 		// getting classpath
-		String classpath = FileUtils.getProperty(SOURCE_PATH,
-				PROPERTY_FILE_NAME);
+		String classpath = JMPlibConfig.getInstance().getOriginalSrcPath();
 		// pointing to source code file of the class
-		classpath += clazz.getName().replace('.', '\\') + ".java";
+		classpath += clazz.getName().replace('.', '/') + ".java";
 		File javaFile = new File(classpath);
 		if (!javaFile.exists()) // If there isn't the file the class cannot be
-								// edited
+			// edited
 			throw new ClassNotEditableException(
 					"The class "
 							+ clazz.getName()
@@ -308,7 +297,7 @@ public class SourceCodeCache {
 
 	/**
 	 * Obtains all ClassContent
-	 * 
+	 *
 	 * @return Collection of all ClassContent
 	 */
 	public Collection<ClassContent> getAll() {
@@ -321,16 +310,17 @@ public class SourceCodeCache {
 	public void clear() {
 		cache.clear();
 	}
-	
+
 	/**
 	 * Gets the original class name from a version class name
+	 *
 	 * @param className
 	 * @return
 	 */
 	public String getOriginalClassNameFromVersion(String className) {
 		if (!className.contains("_NewVersion_"))
 			return className;
-		String [] parts = className.split("_NewVersion_");
+		String[] parts = className.split("_NewVersion_");
 		return parts[0];
 	}
 }

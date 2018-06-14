@@ -1,6 +1,6 @@
 package jmplib.agent.impl;
 
-import static jmplib.util.PathConstants.ORIGINAL_SRC_PATH;
+import jmplib.config.JMPlibConfig;
 import static org.objectweb.asm.Opcodes.ASM5;
 
 import java.io.File;
@@ -55,7 +55,7 @@ public class OriginalClassLoadTimeTransformer extends AbstractTransformer {
 			return false;
 		if (className.contains("_NewVersion_"))
 			return false;
-		if (!(new File(ORIGINAL_SRC_PATH + className + ".java").exists()))
+		if (!(new File(JMPlibConfig.getInstance().getOriginalSrcPath().concat(className).concat(".java")).exists()))
 			return false;
 		return true;
 	}

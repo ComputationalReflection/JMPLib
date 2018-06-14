@@ -8,7 +8,7 @@ import java.io.IOException;
 import jmplib.agent.AbstractTransformer;
 import jmplib.agent.UpdaterAgent;
 import jmplib.annotations.ExcludeFromJMPLib;
-import jmplib.util.PathConstants;
+import jmplib.config.JMPlibConfig;
 
 import org.objectweb.asm.Opcodes;
 
@@ -42,8 +42,7 @@ public class ChangeWriterTransformer extends AbstractTransformer implements
 	@Override
 	public byte[] transform(String className, Class<?> classBeingRedefined,
 			byte[] classfileBuffer) {
-		File file = new File(PathConstants.MODIFIED_CLASS_PATH + className
-				+ ".class");
+		File file = new File(JMPlibConfig.getInstance().getModifiedClassPath().concat(className).concat(".class"));
 		updateClassFile(file, classfileBuffer);
 		return classfileBuffer;
 	}

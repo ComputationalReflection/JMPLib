@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
@@ -14,10 +16,9 @@ import javax.tools.StandardLocation;
 import javax.tools.ToolProvider;
 
 import jmplib.annotations.ExcludeFromJMPLib;
+import jmplib.config.JMPlibConfig;
 import jmplib.exceptions.CompilationFailedException;
 import jmplib.exceptions.StructuralIntercessionException;
-import jmplib.util.FileUtils;
-import jmplib.util.PathConstants;
 
 /**
  * This class is used for compile java files at runtime. The class implements a
@@ -31,7 +32,6 @@ import jmplib.util.PathConstants;
 public class ClassCompiler {
 
 	private static final String JAVA_HOME = "java.home";
-	private static final String PROPERTY_FILE_NAME = "config.properties";
 	private static final ClassCompiler _instance = new ClassCompiler();
 
 	private ClassCompiler() {
@@ -41,10 +41,10 @@ public class ClassCompiler {
 	 * This method compiles multiple java files at runtime. If anyone of those
 	 * has compilation errors, no one would be compiled.
 	 * 
+	 * @param classPath
+	 *            The classpath of the application
 	 * @param files
 	 *            The java files to be compiled
-	 * @param classes
-	 *            The names of the classes that will be compiled
 	 * @throws IOException
 	 * @throws CompilationFailedException
 	 *             It's thrown when the file have source code errors.
@@ -53,24 +53,21 @@ public class ClassCompiler {
 	public void compile(List<File> classPath, JavaFileObject... files)
 			throws CompilationFailedException, IOException,
 			StructuralIntercessionException {
-		System.setProperty(JAVA_HOME,
-				FileUtils.getProperty(JAVA_HOME, PROPERTY_FILE_NAME));
+		Optional<String> javaHome = JMPlibConfig.getInstance().getJavaHome();
+		javaHome.ifPresent(value -> System.setProperty(JAVA_HOME, value));
 		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-		StandardJavaFileManager fileManager = compiler.getStandardFileManager(
-				null, null, null);
-		boolean compiled = false;
+		StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
 		Writer errors = new StringWriter();
 		fileManager.setLocation(StandardLocation.CLASS_OUTPUT,
-				Arrays.asList(new File(PathConstants.ORIGINAL_CLASS_PATH)));
+				Collections.singletonList(new File(JMPlibConfig.getInstance().getOriginalClassPath())));
 		fileManager.setLocation(StandardLocation.CLASS_PATH, classPath);
 		// Compile the file
-		compiled = compiler.getTask(errors, fileManager, null,
-				Arrays.asList("-g"), null, Arrays.asList(files)).call();
+		boolean compiled = compiler.getTask(errors, fileManager, null,
+				Collections.singletonList("-g"), null, Arrays.asList(files)).call();
 		fileManager.close();
 		if (!compiled) {
-			throw new CompilationFailedException(
-					"The compilation of the classes failed.\n"
-							+ errors.toString(), errors.toString());
+			throw new CompilationFailedException("The compilation of the classes failed.\n".concat(errors.toString()),
+					errors.toString());
 		}
 	}
 

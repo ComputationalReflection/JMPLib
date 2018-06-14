@@ -1,7 +1,6 @@
 package jmplib.agent;
 
-import static jmplib.util.PathConstants.MODIFIED_CLASS_PATH;
-import static jmplib.util.PathConstants.ORIGINAL_CLASS_PATH;
+import jmplib.config.JMPlibConfig;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,9 +33,8 @@ import jmplib.util.InheritanceTables;
  * This class is referenced to act as Java Agent on premain and agentmain.
  * Through this class, the code of the updated classes is updated to reference
  * the new functionalities.
- * 
- * @author Ignacio Lagartos
  *
+ * @author Ignacio Lagartos
  */
 public class UpdaterAgent {
 
@@ -54,7 +52,7 @@ public class UpdaterAgent {
 
 	/**
 	 * This method is call before main method, when the agent is pointed to the JVM
-	 * 
+	 *
 	 * @throws StructuralIntercessionException
 	 **/
 	public static void premain(String agentArgs, Instrumentation inst) {
@@ -77,7 +75,7 @@ public class UpdaterAgent {
 	 * The function of this method is initialize the transformers that will process
 	 * the classes to update them. This transformers are added to the
 	 * instrumentation object.
-	 * 
+	 *
 	 * @param sourceMethodName
 	 * @param agentArgs
 	 * @param inst
@@ -96,7 +94,7 @@ public class UpdaterAgent {
 	/**
 	 * Creates all transformers and initialize the classpaths creating the
 	 * generated_bin folder
-	 * 
+	 *
 	 * @throws StructuralIntercessionException
 	 */
 	private static void newTransformerInicialization() throws StructuralIntercessionException {
@@ -120,12 +118,13 @@ public class UpdaterAgent {
 	/**
 	 * Creates the generated_bin folder to allocate the compiled classes and store
 	 * the modified ones
-	 * 
+	 *
 	 * @throws StructuralIntercessionException
 	 */
 	private static void initializeClassPaths() throws StructuralIntercessionException {
-		File bin = new File(ORIGINAL_CLASS_PATH);
-		File file = new File(MODIFIED_CLASS_PATH);
+		JMPlibConfig config = JMPlibConfig.getInstance();
+		File bin = new File(config.getOriginalClassPath());
+		File file = new File(config.getModifiedClassPath());
 		if (file.exists()) {
 			FileUtils.deleteFile(file);
 		}
@@ -135,11 +134,11 @@ public class UpdaterAgent {
 	/**
 	 * Load all classes in the src folder. At the end, all classes are instrumented
 	 * and ready to use the library functionalities
-	 * 
+	 *
 	 * @throws StructuralIntercessionException
 	 */
 	private static void loadClasses() throws StructuralIntercessionException {
-		String src = FileUtils.getProperty("source.path", "config.properties");
+		String src = JMPlibConfig.getInstance().getOriginalSrcPath();
 		Path srcPath = Paths.get(src);
 		try (Stream<Path> stream = Files.find(srcPath, 500, (path, attr) -> String.valueOf(path).endsWith(".java"))) {
 			stream.forEach(path -> cacheClass(path, srcPath));
@@ -152,15 +151,17 @@ public class UpdaterAgent {
 	/**
 	 * Load one class, instrument it, store the source code inside the source code
 	 * cache and add it to the inheritance tree
-	 * 
-	 * @param path
-	 *            The path of the class
-	 * @param srcPath
-	 *            The path of the src folder
+	 *
+	 * @param path The path of the class
+	 * @param srcPath The path of the src folder
 	 */
 	private static void cacheClass(Path path, Path srcPath) {
 
-		String className = srcPath.relativize(path).toString().replaceAll(".java", "").replace('\\', '.');
+		String className = srcPath.relativize(path).toString().replaceAll(".java", "")
+				.replace('/', '.');
+		if (className.contains("package-info")) {
+			return;
+		}
 		try {
 			Class<?> clazz = Class.forName(className, false, UpdaterAgent.class.getClassLoader());
 			if (clazz.isInterface() || clazz.isAnnotation() || clazz.isEnum()) {
@@ -184,9 +185,8 @@ public class UpdaterAgent {
 	/**
 	 * This method dispatches the class received to the instrumentor in order to
 	 * re-transform it in run time.
-	 * 
-	 * @param clazz
-	 *            The classes to re-transform
+	 *
+	 * @param clazz The classes to re-transform
 	 */
 	public static void updateClass(Class<?>... clazz) {
 		try {
