@@ -13,3 +13,4 @@ jetty-web.xml
 bin/
 generated_bin/
 generated_src/
+.idea/workspace.xml
