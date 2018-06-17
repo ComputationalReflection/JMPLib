@@ -158,7 +158,7 @@ public class UpdaterAgent {
 	private static void cacheClass(Path path, Path srcPath) {
 
 		String className = srcPath.relativize(path).toString().replaceAll(".java", "")
-				.replace('/', '.');
+				.replace(File.separatorChar, '.');
 		if (className.contains("package-info")) {
 			return;
 		}

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import es.uniovi.jmplib.testing.dynamicinheritance.classes.Animal;
@@ -73,6 +74,7 @@ public class DynamicInheritanceSuperClassTest {
 	/**
 	 * Change superclass test from the ENASE paper
 	 */
+	@Ignore
 	@SuppressWarnings({ "unchecked", "unused" })
 	@Test
 	public void changeSuperClassTest() {
