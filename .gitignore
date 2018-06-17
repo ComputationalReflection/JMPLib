@@ -10,3 +10,7 @@ datalogs/
 jetty-web.xml
 .DS_Store
 .pydevproject
+bin/
+generated_bin/
+generated_src/
+.idea/workspace.xml

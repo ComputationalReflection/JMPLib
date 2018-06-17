@@ -8,11 +8,11 @@ import java.io.PrintWriter;
 import java.util.List;
 
 import jmplib.annotations.ExcludeFromJMPLib;
+import jmplib.config.JMPlibConfig;
 import jmplib.exceptions.CompilationFailedException;
 import jmplib.util.ClassPathUtil;
 import jmplib.util.FileUtils;
 import jmplib.util.JavaSourceFromString;
-import jmplib.util.PathConstants;
 import polyglot.main.Main.TerminationException;
 import polyglot.util.ErrorInfo;
 import polyglot.util.SilentErrorQueue;
@@ -42,7 +42,7 @@ public class PolyglotAdapter {
 		StringBuffer argPathSB = new StringBuffer("");
 		for (File file : classPath) {
 			argPathSB.append(file.getAbsolutePath());
-			argPathSB.append(';');
+			argPathSB.append(JMPlibConfig.getInstance().getPathSeparator());
 		}
 		String argPath = argPathSB.substring(0, argPathSB.length() - 1);
 
@@ -131,7 +131,7 @@ public class PolyglotAdapter {
 	}
 
 	static {
-		File polyglotFolder = new File(PathConstants.POLYGLOT_PATH);
+		File polyglotFolder = new File(JMPlibConfig.getInstance().getPolyglotPath());
 		if (polyglotFolder.exists())
 			FileUtils.deleteFile(polyglotFolder);
 	}

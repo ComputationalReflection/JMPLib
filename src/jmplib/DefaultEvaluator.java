@@ -15,6 +15,7 @@ import com.github.javaparser.ast.body.TypeDeclaration;
 import jmplib.agent.UpdaterAgent;
 import jmplib.compiler.ClassCompiler;
 import jmplib.compiler.PolyglotAdapter;
+import jmplib.config.JMPlibConfig;
 import jmplib.exceptions.CompilationFailedException;
 import jmplib.exceptions.StructuralIntercessionException;
 import jmplib.invokers.EvalInvokerData;
@@ -25,7 +26,6 @@ import jmplib.util.ClassPathUtil;
 import jmplib.util.EvaluatorUtils;
 import jmplib.util.InheritanceTables;
 import jmplib.util.JavaSourceFromString;
-import jmplib.util.PathConstants;
 import jmplib.util.WrapperClassGenerator;
 import jmplib.util.intercessor.IntercessorTypeConversion;
 import jmplib.util.intercessor.IntercessorUtils;
@@ -229,7 +229,8 @@ public class DefaultEvaluator implements IEvaluator {
 				inheritance = decl.getExtends() != null && decl.getExtends().size() > 0;
 			}
 			String name = pack + "." + type.getName();
-			source = new File(PathConstants.ORIGINAL_SRC_PATH + name.replace('.', '/') + ".java");
+			String originalSrcPath = JMPlibConfig.getInstance().getOriginalSrcPath();
+			source = new File(originalSrcPath.concat(name.replace('.', '/').concat(".java")));
 			if (!source.exists()) {
 				source.createNewFile();
 			} else {
