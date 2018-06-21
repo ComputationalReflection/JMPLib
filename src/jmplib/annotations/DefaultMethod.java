@@ -9,12 +9,11 @@ import java.lang.annotation.Target;
  * This annotation marks a method as a default method. A default method is a
  * redefinition of a superclass method and contains a call to the superclass
  * implementation.
- * 
- * @author Nacho
  *
+ * @author Nacho
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.METHOD })
+@Target({ElementType.METHOD})
 public @interface DefaultMethod {
 
 }

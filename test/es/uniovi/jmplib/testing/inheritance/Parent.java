@@ -1,7 +1,7 @@
 package es.uniovi.jmplib.testing.inheritance;
 
 public class Parent {
-	
-	public int a = 1;
+
+    public int a = 1;
 
 }

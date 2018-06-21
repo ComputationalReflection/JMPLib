@@ -9,7 +9,7 @@ package es.uniovi.jmplib.testing.times.binarytrees;
 
 public class BinaryTrees extends Test {
 
-	@Override
-	public void test() {
-	}
+    @Override
+    public void test() {
+    }
 }

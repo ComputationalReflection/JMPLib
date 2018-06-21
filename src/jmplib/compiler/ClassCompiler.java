@@ -1,5 +1,10 @@
 package jmplib.compiler;
 
+import jmplib.annotations.ExcludeFromJMPLib;
+import jmplib.config.JMPlibConfig;
+import jmplib.exceptions.CompilationFailedException;
+
+import javax.tools.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -9,75 +14,58 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import javax.tools.JavaCompiler;
-import javax.tools.JavaFileObject;
-import javax.tools.StandardJavaFileManager;
-import javax.tools.StandardLocation;
-import javax.tools.ToolProvider;
-
-import jmplib.annotations.ExcludeFromJMPLib;
-import jmplib.config.JMPlibConfig;
-import jmplib.exceptions.CompilationFailedException;
-import jmplib.exceptions.StructuralIntercessionException;
-
 /**
  * This class is used for compile java files at runtime. The class implements a
  * singleton pattern so all the constructors are private. It is possible to
  * create an instance through the {@link ClassCompiler#getInstance()} method.
- * 
+ *
  * @author Ignacio Lagartos
- * 
  */
 @ExcludeFromJMPLib
 public class ClassCompiler {
 
-	private static final String JAVA_HOME = "java.home";
-	private static final ClassCompiler _instance = new ClassCompiler();
+    private static final String JAVA_HOME = "java.home";
+    private static final ClassCompiler _instance = new ClassCompiler();
 
-	private ClassCompiler() {
-	}
+    private ClassCompiler() {
+    }
 
-	/**
-	 * This method compiles multiple java files at runtime. If anyone of those
-	 * has compilation errors, no one would be compiled.
-	 * 
-	 * @param classPath
-	 *            The classpath of the application
-	 * @param files
-	 *            The java files to be compiled
-	 * @throws IOException
-	 * @throws CompilationFailedException
-	 *             It's thrown when the file have source code errors.
-	 * @throws StructuralIntercessionException
-	 */
-	public void compile(List<File> classPath, JavaFileObject... files)
-			throws CompilationFailedException, IOException,
-			StructuralIntercessionException {
-		Optional<String> javaHome = JMPlibConfig.getInstance().getJavaHome();
-		javaHome.ifPresent(value -> System.setProperty(JAVA_HOME, value));
-		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-		StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
-		Writer errors = new StringWriter();
-		fileManager.setLocation(StandardLocation.CLASS_OUTPUT,
-				Collections.singletonList(new File(JMPlibConfig.getInstance().getOriginalClassPath())));
-		fileManager.setLocation(StandardLocation.CLASS_PATH, classPath);
-		// Compile the file
-		boolean compiled = compiler.getTask(errors, fileManager, null,
-				Collections.singletonList("-g"), null, Arrays.asList(files)).call();
-		fileManager.close();
-		if (!compiled) {
-			throw new CompilationFailedException("The compilation of the classes failed.\n".concat(errors.toString()),
-					errors.toString());
-		}
-	}
+    /**
+     * This method compiles multiple java files at runtime. If anyone of those
+     * has compilation errors, no one would be compiled.
+     *
+     * @param classPath The classpath of the application
+     * @param files     The java files to be compiled
+     * @throws IOException If the file cannot be accessed
+     * @throws CompilationFailedException It's thrown when the file have source code errors.
+     */
+    public void compile(List<File> classPath, JavaFileObject... files)
+            throws CompilationFailedException, IOException {
+        Optional<String> javaHome = JMPlibConfig.getInstance().getJavaHome();
+        javaHome.ifPresent(value -> System.setProperty(JAVA_HOME, value));
+        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+        StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
+        Writer errors = new StringWriter();
+        fileManager.setLocation(StandardLocation.CLASS_OUTPUT,
+                Collections.singletonList(new File(JMPlibConfig.getInstance().getOriginalClassPath())));
+        fileManager.setLocation(StandardLocation.CLASS_PATH, classPath);
+        // Compile the file
+        boolean compiled = compiler.getTask(errors, fileManager, null,
+                Collections.singletonList("-g"), null, Arrays.asList(files)).call();
+        fileManager.close();
+        if (!compiled) {
+            throw new CompilationFailedException("The compilation of the classes failed.\n".concat(errors.toString()),
+                    errors.toString());
+        }
+    }
 
-	/**
-	 * Obtains the instance of the ClassCompiler
-	 * 
-	 * @return {@link ClassCompiler}
-	 */
-	public static ClassCompiler getInstance() {
-		return _instance;
-	}
+    /**
+     * Obtains the instance of the ClassCompiler
+     *
+     * @return {@link ClassCompiler}
+     */
+    public static ClassCompiler getInstance() {
+        return _instance;
+    }
 
 }

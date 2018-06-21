@@ -7,12 +7,11 @@ import java.lang.annotation.Target;
 
 /**
  * This annotation marks a class that does not have to be processed by JMPLib.
- * 
- * @author Jose Manuel Redondo López
  *
+ * @author Jose Manuel Redondo Lï¿½pez
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE })
+@Target({ElementType.TYPE})
 public @interface ExcludeFromJMPLib {
 
 }

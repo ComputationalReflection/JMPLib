@@ -6,8 +6,7 @@ public class Sphere extends Primitive {
     Vec c;
     double r, r2;
 
-    public Sphere(Vec center, double radius)
-    {
+    public Sphere(Vec center, double radius) {
         c = center;
         r = radius;
         r2 = r * r;
