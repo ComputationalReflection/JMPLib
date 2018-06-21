@@ -1,12 +1,12 @@
 package jmplib;
 
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Type;
-import java.util.Map;
-
 import jmplib.exceptions.StructuralIntercessionException;
 import jmplib.reflect.Class;
 import jmplib.reflect.TypeVariable;
+
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Type;
+import java.util.Map;
 
 /**
  * An intercessor of classes. This class is the main fa�ade of JMPlib and
@@ -25,18 +25,16 @@ public class SimpleIntercessor implements IIntercessor {
 
     private static IIntercessor _instance = new SimpleIntercessor();
 
-    private IIntercessor transactionalint = TransactionalIntercessor.getInstance();
+    private IIntercessor transactionalint = new TransactionalIntercessor().createIntercessor();
 
     /* **************************************
      * INSTANCE CREATION
      **************************************/
 
     /**
-     * Creates an instance of this Intercessor. This intercessor is a singleton
-     *
-     * @return
+     * {@inheritDoc}
      */
-    public static IIntercessor getInstance() {
+    public IIntercessor createIntercessor() {
         return _instance;
     }
 

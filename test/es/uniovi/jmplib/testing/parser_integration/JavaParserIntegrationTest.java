@@ -39,7 +39,7 @@ public class JavaParserIntegrationTest {
             md.setBody(b);
             Method newMethod = new Method(md);
 
-            IIntercessor intercessor = SimpleIntercessor.getInstance();
+            IIntercessor intercessor = new SimpleIntercessor().createIntercessor();
             intercessor.replaceImplementation(Calculator.class, newMethod);
             assertTrue(m.getSourceCode().contains("System.out.println(\"Invoking sin\");"));
             assertTrue(m.getSourceCode().contains("return Math.sin(a);"));
@@ -57,7 +57,7 @@ public class JavaParserIntegrationTest {
             FieldDeclaration fd = m.getFieldDeclaration();
             fd.getVariables().get(0).setId(new VariableDeclaratorId("newName"));
             Field f2 = new Field(fd);
-            IIntercessor intercessor = SimpleIntercessor.getInstance();
+            IIntercessor intercessor = new SimpleIntercessor().createIntercessor();
             intercessor.addField(cl, f2);
             String source = cl.getSourceCode().trim();
 

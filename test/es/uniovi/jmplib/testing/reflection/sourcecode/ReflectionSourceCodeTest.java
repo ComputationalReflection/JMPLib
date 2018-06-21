@@ -1,6 +1,6 @@
 package es.uniovi.jmplib.testing.reflection.sourcecode;
 
-import jmplib.DefaultEvaluator;
+import jmplib.SimpleEvaluator;
 import jmplib.IEvaluator;
 import jmplib.IIntercessor;
 import jmplib.SimpleIntercessor;
@@ -23,8 +23,8 @@ import static org.junit.Assert.fail;
  */
 @ExcludeFromJMPLib
 public class ReflectionSourceCodeTest {
-    private static IIntercessor Intercessor = SimpleIntercessor.getInstance();
-    private static IEvaluator Evaluator = DefaultEvaluator.getInstance();
+    private static IIntercessor Intercessor = new SimpleIntercessor().createIntercessor();
+    private static IEvaluator Evaluator = new SimpleEvaluator().createEvaluator();
 
     private boolean compareSource(String src1, String src2) {
         String[] lines1 = src1.split("[\\r\\n]+");

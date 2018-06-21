@@ -44,7 +44,10 @@ public class TransactionalIntercessor implements IIntercessor {
      * INSTANCE CREATION
      **************************************/
 
-    public static IIntercessor getInstance() {
+    /**
+     * {@inheritDoc}
+     */
+    public IIntercessor createIntercessor() {
         return new TransactionalIntercessor();
     }
 
@@ -298,7 +301,7 @@ public class TransactionalIntercessor implements IIntercessor {
 
         IntercessorValidators.checkValidIdentifier(packageName);
         IntercessorValidators.checkValidIdentifier(className);
-        java.lang.Class<?> newClass = DefaultEvaluator.getInstance().createEmptyClass(packageName, className,
+        java.lang.Class<?> newClass = new SimpleEvaluator().createEvaluator().createEmptyClass(packageName, className,
                 getImports(origin));
 
         TransactionalIntercessor tempti = new TransactionalIntercessor();

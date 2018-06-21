@@ -14,8 +14,8 @@ import static org.junit.Assert.*;
 
 @ExcludeFromJMPLib
 public class ReplaceMethodTest {
-    private static IIntercessor Intercessor = SimpleIntercessor.getInstance();
-    private static IEvaluator Evaluator = DefaultEvaluator.getInstance();
+    private static IIntercessor Intercessor = new SimpleIntercessor().createIntercessor();
+    private static IEvaluator Evaluator = new SimpleEvaluator().createEvaluator();
 
     @Test
     public void testReplaceMethod_ExistingMethod_Params() throws StructuralIntercessionException {

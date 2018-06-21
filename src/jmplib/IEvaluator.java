@@ -11,6 +11,17 @@ import java.lang.reflect.Type;
 @SuppressWarnings("unused")
 public interface IEvaluator {
     /* **************************************
+     * INSTANCE CREATION
+     **************************************/
+
+    /**
+     * Creates an instance of the evaluator implementing this interface
+     *
+     * @return An evaluator instance
+     */
+    IEvaluator createEvaluator();
+
+    /* **************************************
      * INVOKERS
      **************************************/
 

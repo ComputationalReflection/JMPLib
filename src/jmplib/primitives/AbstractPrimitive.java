@@ -53,18 +53,21 @@ public abstract class AbstractPrimitive implements Primitive {
             return;
         }
         ClassContent top = getTopSuperClass(classContent);
-        modifiedClasses.add(top);
-
         // Update the version number
         int oldVersionNumber = top.getVersion();
         int newVersionNumber = oldVersionNumber + 1;
-        top.setVersion(newVersionNumber);
 
-        // Update the className
-        String content = top.getContent();
-        content = changeVersion(content, top.getClazz(), oldVersionNumber,
-                newVersionNumber);
-        top.setContent(content);
+        if (top.getClazz() != Object.class) {
+            modifiedClasses.add(top);
+
+            top.setVersion(newVersionNumber);
+
+            // Update the className
+            String content = top.getContent();
+            content = changeVersion(content, top.getClazz(), oldVersionNumber,
+                    newVersionNumber);
+            top.setContent(content);
+        }
 
         // Update subclasses
         for (Class<?> subClass : InheritanceTables
@@ -275,7 +278,7 @@ public abstract class AbstractPrimitive implements Primitive {
 			return classContent;
 		ClassContent superclassContent = null;
 		try {
-			superclassContent = SourceCodeCache.getInstance().getClassContent(
+			superclassContent = SourceCodeCache.createIntercessor().getClassContent(
 					classContent.getClazz().getSuperclass());
 			return getTopSuperClass(superclassContent);
 		} catch (StructuralIntercessionException e) {

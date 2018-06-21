@@ -1,6 +1,6 @@
 package es.uniovi.jmplib.testing.common;
 
-import jmplib.DefaultEvaluator;
+import jmplib.SimpleEvaluator;
 import jmplib.IEvaluator;
 import jmplib.IIntercessor;
 import jmplib.SimpleIntercessor;
@@ -8,8 +8,8 @@ import jmplib.exceptions.StructuralIntercessionException;
 import jmplib.invokers.MemberInvokerData;
 
 public class ErrorTargetClassChild extends ErrorTargetClassParent {
-    private static IIntercessor Intercessor = SimpleIntercessor.getInstance();
-    private static IEvaluator Evaluator = DefaultEvaluator.getInstance();
+    private static IIntercessor Intercessor = new SimpleIntercessor().createIntercessor();
+    private static IEvaluator Evaluator = new SimpleEvaluator().createEvaluator();
 
     public static String staticMethod() {
         return "static";

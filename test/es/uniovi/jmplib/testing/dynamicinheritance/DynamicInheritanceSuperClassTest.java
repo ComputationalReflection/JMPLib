@@ -2,7 +2,7 @@ package es.uniovi.jmplib.testing.dynamicinheritance;
 
 import es.uniovi.jmplib.testing.dynamicinheritance.classes.*;
 import es.uniovi.jmplib.testing.reflection.StructuralChanges;
-import jmplib.DefaultEvaluator;
+import jmplib.SimpleEvaluator;
 import jmplib.IEvaluator;
 import jmplib.IIntercessor;
 import jmplib.SimpleIntercessor;
@@ -27,8 +27,8 @@ import static org.junit.Assert.fail;
  */
 @ExcludeFromJMPLib
 public class DynamicInheritanceSuperClassTest {
-    private static IIntercessor Intercessor = SimpleIntercessor.getInstance();
-    private static IEvaluator Evaluator = DefaultEvaluator.getInstance();
+    private static IIntercessor Intercessor = new SimpleIntercessor().createIntercessor();
+    private static IEvaluator Evaluator = new SimpleEvaluator().createEvaluator();
 
     /**
      * This is necessary due to the code generation problems that the first stages

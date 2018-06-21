@@ -19,7 +19,7 @@ public class RayTracerBenchMark extends BenchMark {
 
     @Override
     public void prepare() {
-        IIntercessor transaction = TransactionalIntercessor.getInstance();
+        IIntercessor transaction = new TransactionalIntercessor().createIntercessor();
         try {
             List<jmplib.reflect.Field> fields = new ArrayList<jmplib.reflect.Field>();
             List<jmplib.reflect.Method> methods = new ArrayList<jmplib.reflect.Method>();

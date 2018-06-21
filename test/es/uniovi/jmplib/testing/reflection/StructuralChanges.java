@@ -15,7 +15,7 @@ public class StructuralChanges {
             "set_CurrentInstanceVersion", "get_NewVersion", "_transferState", "get_ObjCreated", "set_NewVersion");
     public static List<String> jmpLibInstrumentFieldNames = Arrays.asList("_newVersion", "_currentInstanceVersion",
             "_currentClassVersion");
-    private static IIntercessor Intercessor = SimpleIntercessor.getInstance();
+    private static IIntercessor Intercessor = new SimpleIntercessor().createIntercessor();
 
     public static boolean findMethodByName(String name, Method[] methodList) {
         for (Method m : methodList) {

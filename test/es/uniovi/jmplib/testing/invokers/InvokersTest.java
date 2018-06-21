@@ -1,6 +1,6 @@
 package es.uniovi.jmplib.testing.invokers;
 
-import jmplib.DefaultEvaluator;
+import jmplib.SimpleEvaluator;
 import jmplib.IEvaluator;
 import jmplib.annotations.ExcludeFromJMPLib;
 import jmplib.exceptions.StructuralIntercessionException;
@@ -19,7 +19,7 @@ import static org.junit.Assert.*;
 
 @ExcludeFromJMPLib
 public class InvokersTest {
-    private static IEvaluator Evaluator = DefaultEvaluator.getInstance();
+    private static IEvaluator Evaluator = new SimpleEvaluator().createEvaluator();
 
     @Test
     public void testGetInvoker_OriginalMethod() throws StructuralIntercessionException {

@@ -15,7 +15,7 @@ import static org.junit.Assert.fail;
 
 @ExcludeFromJMPLib
 public class AnnotationTest {
-    private static IIntercessor Intercessor = SimpleIntercessor.getInstance();
+    private static IIntercessor Intercessor = new SimpleIntercessor().createIntercessor();
 
     @Test
     public void testAddAnnotationToClass() {

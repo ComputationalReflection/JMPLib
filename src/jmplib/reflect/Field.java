@@ -1,5 +1,6 @@
 package jmplib.reflect;
 
+import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
@@ -12,6 +13,7 @@ import jmplib.util.intercessor.IntercessorTypeConversion;
 import jmplib.util.intercessor.IntercessorValidators;
 import sun.reflect.CallerSensitive;
 
+import java.io.StringReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 
@@ -1863,13 +1865,21 @@ public class Field extends AccessibleObject implements Member {
         java.lang.Class<?> declaringClass = this.getDeclaringClass();
         // Class content
         ClassContent classContent;
+        CompilationUnit unit;
 
         try {
             classContent = SourceCodeCache.getInstance().getClassContent(declaringClass);
-            CompilationUnit unit = JavaParserUtils.parse(classContent.getContent());
+            unit = JavaParserUtils.parse(classContent.getContent());
             return JavaParserUtils.searchFieldDeclaration(unit, declaringClass, this.getName());
         } catch (Exception e) {
-            throw new StructuralIntercessionException(e.getMessage(), e.getCause());
+            try {
+                StringReader sr = new StringReader(SourceCodeCache.getInstance().getSourceFromSrcZipExtractor().getSourceCode(this.getDeclaringClass().getName()));
+                unit = JavaParser.parse(sr, true);
+                return JavaParserUtils.searchFieldDeclarationFromJavaParserCU(unit, declaringClass, this.getName());
+            }
+            catch(Exception ex) {
+                throw new StructuralIntercessionException(e.getMessage(), e.getCause());
+            }
         }
     }
 

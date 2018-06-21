@@ -420,7 +420,7 @@ public class PrimitiveFactory {
     /**
      * Creates {@link createSetAnnotationToMethodPrimitive}
      *
-     * @param clazz
+     * @param met Method to add an annotation
      * @return The {@link Primitive} ready to be executed
      * @throws StructuralIntercessionException
      */

@@ -1,40 +1,28 @@
 package jmplib.javaparser.util;
 
-import java.io.FileInputStream;
-import java.io.Reader;
-import java.io.StringReader;
-import java.lang.reflect.ParameterizedType;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseException;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.PackageDeclaration;
-import com.github.javaparser.ast.body.BodyDeclaration;
-import com.github.javaparser.ast.body.FieldDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.body.Parameter;
-import com.github.javaparser.ast.body.TypeDeclaration;
-import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.QualifiedNameExpr;
-import com.github.javaparser.ast.type.ClassOrInterfaceType;
-import com.github.javaparser.ast.type.PrimitiveType;
+import com.github.javaparser.ast.type.*;
 import com.github.javaparser.ast.type.PrimitiveType.Primitive;
-import com.github.javaparser.ast.type.ReferenceType;
-import com.github.javaparser.ast.type.Type;
-import com.github.javaparser.ast.type.VoidType;
-
 import jmplib.annotations.ExcludeFromJMPLib;
 import jmplib.exceptions.StructuralIntercessionException;
 import jmplib.sourcecode.ClassContent;
 import jmplib.sourcecode.SourceCodeCache;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.Reader;
+import java.io.StringReader;
+import java.lang.reflect.ParameterizedType;
+import java.net.URL;
+import java.util.*;
+import java.util.function.BiFunction;
 
 /**
  * Helper class to encapsulate the most common Java Parser operations
@@ -181,6 +169,25 @@ public class JavaParserUtils {
      * @param clazz The class
      * @return Return the {@link TypeDeclaration} or null
      */
+    public static TypeDeclaration searchTypeFromJavaParserCU(CompilationUnit unit, Class<?> clazz) {
+        String packageName = unit.getPackage().getName().toString();
+        for (TypeDeclaration td : unit.getTypes()) {
+            String tdName = packageName + "." + td.getName();
+            if (tdName.equals(clazz.getName())) {
+                return td;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Obtains the {@link TypeDeclaration} of the specified class from the
+     * compilation Unit
+     *
+     * @param unit  The Compilation unit
+     * @param clazz The class
+     * @return Return the {@link TypeDeclaration} or null
+     */
     public static TypeDeclaration searchType(CompilationUnit unit, Class<?> clazz) {
         String versionName = "";
         try {
@@ -237,6 +244,40 @@ public class JavaParserUtils {
             }
         }
         return null;
+    }
+
+    /**
+     * Search a method node in the compilation unit
+     *
+     * @param unit             The compilation Unit
+     * @param clazz            The class owner
+     * @param name             The name of the method
+     * @param parameterClasses The parameter classes
+     * @param returnClass      The type of the method
+     * @return The method node
+     * @throws NoSuchMethodException If the method is not in the CompilationUnit
+     */
+    public static MethodDeclaration searchMethodFromJavaParserCU(CompilationUnit unit, Class<?> clazz, String name,
+                                                 Class<?>[] parameterClasses, Class<?> returnClass) throws NoSuchMethodException {
+        TypeDeclaration typeDeclaration = searchTypeFromJavaParserCU(unit, clazz);
+        List<BodyDeclaration> members = typeDeclaration.getMembers();
+        for (BodyDeclaration member : members) {
+            if (member instanceof MethodDeclaration) {
+                MethodDeclaration method = (MethodDeclaration) member;
+
+                if (checkMethod(method, unit.getImports(), unit.getPackage(), name, parameterClasses, returnClass)) {
+                    return method;
+                }
+            }
+        }
+        String params = "";
+        for (Class<?> parameterClass : parameterClasses) {
+            params += parameterClass.getName() + ",";
+        }
+        if (!"".equals(params))
+            params = params.substring(0, params.length() - 1);
+        throw new NoSuchMethodException("The method " + name + "(" + params + "): " + returnClass.getName()
+                + " does not exist in the class " + clazz.getName());
     }
 
     /**
@@ -322,6 +363,31 @@ public class JavaParserUtils {
                 for (VariableDeclarator declaration : field.getVariables()) {
                     if (declaration.getId().getName().equals(name))
                         return declaration;
+                }
+            }
+        }
+        throw new NoSuchFieldException("The field \"" + name + "\" does not exist in the class " + clazz.getName());
+    }
+
+    /**
+     * Search a field declaration in the compilation unit
+     *
+     * @param unit  The compilation Unit
+     * @param clazz The class owner
+     * @param name  The name of the field
+     * @return The field node
+     * @throws NoSuchFieldException If the field is not in the CompilationUnit
+     */
+    public static FieldDeclaration searchFieldDeclarationFromJavaParserCU(CompilationUnit unit, Class<?> clazz, String name)
+            throws NoSuchFieldException {
+        TypeDeclaration typeDeclaration = searchTypeFromJavaParserCU(unit, clazz);
+        List<BodyDeclaration> members = typeDeclaration.getMembers();
+        for (BodyDeclaration member : members) {
+            if (member instanceof FieldDeclaration) {
+                FieldDeclaration field = (FieldDeclaration) member;
+                for (VariableDeclarator declaration : field.getVariables()) {
+                    if (declaration.getId().getName().equals(name))
+                        return field;
                 }
             }
         }
@@ -643,26 +709,85 @@ public class JavaParserUtils {
     }
 
     /**
-     * Obtains a JavaParser compilation unit from a class object.
+     * Obtain a tentative .java file name from the .class file name, useful if the .java file resides in the same folder
+     * as the .class file.
      *
      * @param classObject
      * @return
-     * @throws StructuralIntercessionException
+     */
+    private static String getJavaFromClass(Class<?> classObject) {
+        URL classPath = classObject.getResource(classObject.getSimpleName() + ".class");
+        String javaFile = classPath.toString().replace("file:/", "");
+        javaFile = javaFile.substring(0, javaFile.length() - ".class".length()); // Remove ".class"
+        return javaFile + ".java";
+    }
+
+    private static String existInSrc(String javaFilePath, String javaFileName) {
+        String transf = javaFilePath.replace("/bin", "/src");
+        File f = new File(transf);
+        if (f.exists())
+            return transf;
+        return null;
+    }
+
+    private static String existInSrcNoBasePackage(String javaFilePath, String javaFileName) {
+        String transf = javaFilePath.replace("/bin", "/test");
+        File f = new File(transf);
+        if (f.exists())
+            return transf;
+        return null;
+    }
+
+    private static String existInClassPath(String javaFilePath, String javaFileName) {
+        String transf;
+        String classpath = System.getProperty("java.class.path");
+        String[] paths = classpath.split(";");
+
+        for (String path : paths) {
+            if (path.endsWith(".jar"))
+                continue;
+            transf = path + "/" + javaFileName;
+            File f = new File(transf);
+            if (f.exists()) return transf;
+        }
+        return null;
+    }
+
+    private static List<BiFunction<String, String, String>> pathFunctions;
+
+    static {
+        pathFunctions = Arrays.asList(
+                JavaParserUtils::existInSrc,
+                JavaParserUtils::existInSrcNoBasePackage,
+                JavaParserUtils::existInClassPath
+        );
+    }
+
+    /**
+     * Obtains a JavaParser compilation unit from a class object.
+     *
+     * @param classObject Class object
+     * @return A JavaParser CompilationUnit
+     * @throws StructuralIntercessionException If some problem occurs trying to locate the source of the .class file
      */
     public static CompilationUnit getCompilationUnit(Class<?> classObject) throws StructuralIntercessionException {
-        URL classPath = classObject.getResource(classObject.getSimpleName() + ".class");
-        String javaFilePath = classPath.toString().replace(".class", ".java").replace("file:/", "");
+        String javaFilePath = getJavaFromClass(classObject);
 
         FileInputStream in;
+        String javaFile = null;
+        for (BiFunction<String, String, String> bf : pathFunctions) {
+            javaFile = bf.apply(javaFilePath, classObject.getSimpleName() + ".java");
+            if (javaFile != null) break;
+        }
+
+        if (javaFile == null)
+            throw new StructuralIntercessionException("Cannot find a suitable .java file for " + classObject.getSimpleName());
+
         try {
-            in = new FileInputStream(javaFilePath);
+            in = new FileInputStream(javaFile);
         } catch (Exception e) {
-            try {
-                String altSource = javaFilePath.replace("/bin", "/src");
-                in = new FileInputStream(altSource);
-            } catch (Exception e2) {
-                throw new StructuralIntercessionException(e2.getMessage(), e2.getCause());
-            }
+
+            throw new StructuralIntercessionException(e.getMessage(), e.getCause());
         }
 
         // parse the file

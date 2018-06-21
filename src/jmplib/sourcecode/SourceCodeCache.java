@@ -39,7 +39,11 @@ public class SourceCodeCache {
     private static final String SOURCE_PATH = "source.path";
     private static SourceCodeCache _instance = null;
     private static Map<Integer, ClassContent> cache = new HashMap<>();
+    private static SourceFromSrcZipExtractor sourceFromSrcZip;
 
+    public static SourceFromSrcZipExtractor getSourceFromSrcZipExtractor() {
+        return sourceFromSrcZip;
+    }
     /**
      * The constructor creates the folder where the generated versions of the
      * classes will be located.
@@ -53,6 +57,11 @@ public class SourceCodeCache {
         }
         // creating again
         file.mkdir();
+        try {
+            sourceFromSrcZip = new SourceFromSrcZipExtractor();
+        } catch (Exception ex) {
+
+        }
     }
 
     /**
@@ -131,20 +140,42 @@ public class SourceCodeCache {
         if (clazz.isInterface()) {
             throw new ClassNotEditableException("Interfaces are not editable");
         }
+        File file = null;
+        //StringReader sr = null;
+        //try {
         // Loads the file
-        File file = loadJavaFile(clazz);
+        file = loadJavaFile(clazz);
+       /* } catch (Exception ex) {
+            try {
+
+                Does not work
+                sr = new StringReader(SourceCodeCache.sourceFromSrcZip.getSourceCode(clazz.getName()));
+                Class<?> sc = clazz.getSuperclass();
+                if (sc != Object.class)
+                {
+                    addClass(sc);
+                    sc = sc.getSuperclass();
+                }
+            } catch (Exception ex2) {
+                throw ex;
+            }
+        }*/
         String newName = clazz.getSimpleName() + "_NewVersion_0";
         // gets the content and adding auxiliary methods and fields
         CompilationUnit unit = null;
         try {
+            //if (file != null)
             unit = JavaParser.parse(file);
+            //else
+            //    unit = JavaParser.parse(sr, false);
+
         } catch (ParseException e) {
             throw new ClassNotEditableException("The class cannot be parsed", e);
         } catch (IOException e) {
             throw new ClassNotEditableException(
                     "The class "
                             + clazz.getName()
-                            + " cannot be modified because the source file is not accesible",
+                            + " cannot be modified because the source file is not accessible",
                     e);
         }
         TypeDeclaration declaration = unit.getTypes().get(0);
@@ -168,9 +199,11 @@ public class SourceCodeCache {
                         + clazz.getSimpleName() + "\\(", "public " + newName
                         + "(");
         // Change superclass name
-        newContent = newContent.replaceAll("(extends)( )+"
-                + clazz.getSuperclass().getSimpleName(), "extends "
-                + clazz.getSuperclass().getSimpleName() + "_NewVersion_0");
+        if (clazz.getSuperclass() != null)
+            newContent = newContent.replaceAll("(extends)( )+"
+                    + clazz.getSuperclass().getSimpleName(), "extends "
+                    + clazz.getSuperclass().getSimpleName() + "_NewVersion_0");
+
         // Creates the folders and the file with the example path
         File sourceFile = createFile(clazz, newName);
         // Creates the wrapper to store the information
@@ -288,7 +321,7 @@ public class SourceCodeCache {
             throw new ClassNotEditableException(
                     "The class "
                             + clazz.getName()
-                            + " cannot be modified because the source file is not accesible");
+                            + " cannot be modified because the source file is not accessible");
         return javaFile;
     }
 

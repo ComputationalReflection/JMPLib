@@ -15,7 +15,7 @@ import static org.junit.Assert.*;
 
 @ExcludeFromJMPLib
 public class DeleteFieldTest {
-    private static IIntercessor Intercessor = SimpleIntercessor.getInstance();
+    private static IIntercessor Intercessor = new SimpleIntercessor().createIntercessor();
 
     @Test
     public void testDeleteField() throws StructuralIntercessionException {
@@ -59,7 +59,7 @@ public class DeleteFieldTest {
             assertNotNull(e.getCause());
             assertThat(e.getCause(), instanceOf(ClassNotEditableException.class));
             assertThat(e.getCause().getMessage(), equalTo("The class " + Object.class.getName() + " cannot "
-                    + "be modified because the source file is not accesible"));
+                    + "be modified because the source file is not accessible"));
         }
         IIntercessor transaction = new TransactionalIntercessor();
         try {
@@ -69,7 +69,7 @@ public class DeleteFieldTest {
             assertNotNull(e.getCause());
             assertThat(e.getCause(), instanceOf(ClassNotEditableException.class));
             assertThat(e.getCause().getMessage(), equalTo("The class " + Object.class.getName() + " cannot "
-                    + "be modified because the source file is not accesible"));
+                    + "be modified because the source file is not accessible"));
         }
     }
 

@@ -2,7 +2,7 @@ package es.uniovi.jmplib.testing.modifiers;
 
 import es.uniovi.jmplib.testing.interfaces.Func_String;
 import es.uniovi.jmplib.testing.interfaces.Func_double_double_double;
-import jmplib.DefaultEvaluator;
+import jmplib.SimpleEvaluator;
 import jmplib.IEvaluator;
 import jmplib.IIntercessor;
 import jmplib.SimpleIntercessor;
@@ -19,8 +19,8 @@ import static org.junit.Assert.*;
 
 @ExcludeFromJMPLib
 public class ModifierStaticTest {
-    private static IIntercessor Intercessor = SimpleIntercessor.getInstance();
-    private static IEvaluator Evaluator = DefaultEvaluator.getInstance();
+    private static IIntercessor Intercessor = new SimpleIntercessor().createIntercessor();
+    private static IEvaluator Evaluator = new SimpleEvaluator().createEvaluator();
 
     @Test
     public void addPublicMethod() throws StructuralIntercessionException {

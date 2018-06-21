@@ -1,7 +1,7 @@
 package es.uniovi.jmplib.testing.visibility;
 
 import es.uniovi.jmplib.testing.common.*;
-import jmplib.DefaultEvaluator;
+import jmplib.SimpleEvaluator;
 import jmplib.IEvaluator;
 import jmplib.annotations.ExcludeFromJMPLib;
 import jmplib.exceptions.CompilationFailedException;
@@ -16,7 +16,7 @@ import static org.junit.Assert.*;
 
 @ExcludeFromJMPLib
 public class ExternalFieldAccesTest {
-    private static IEvaluator Evaluator = DefaultEvaluator.getInstance();
+    private static IEvaluator Evaluator = new SimpleEvaluator().createEvaluator();
 
     @Test
     public void testPublicVisibility() {
