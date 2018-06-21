@@ -1,6 +1,6 @@
 package es.uniovi.jmplib.testing.inheritance;
 
-import jmplib.DefaultEvaluator;
+import jmplib.SimpleEvaluator;
 import jmplib.IEvaluator;
 import jmplib.IIntercessor;
 import jmplib.SimpleIntercessor;
@@ -19,8 +19,8 @@ import static org.junit.Assert.*;
 
 @ExcludeFromJMPLib
 public class InheritanceStaticTest {
-    private static IIntercessor Intercessor = SimpleIntercessor.getInstance();
-    private static IEvaluator Evaluator = DefaultEvaluator.getInstance();
+    private static IIntercessor Intercessor = new SimpleIntercessor().createIntercessor();
+    private static IEvaluator Evaluator = new SimpleEvaluator().createEvaluator();
 
     /*
      * @Before public void init() { IntercessorTransaction.resetLibraryState(); }

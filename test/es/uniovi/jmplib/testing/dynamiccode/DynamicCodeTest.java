@@ -23,8 +23,8 @@ import static org.junit.Assert.*;
 
 @ExcludeFromJMPLib
 public class DynamicCodeTest {
-    private static IIntercessor Intercessor = SimpleIntercessor.getInstance();
-    private static IEvaluator Evaluator = DefaultEvaluator.getInstance();
+    private static IIntercessor Intercessor = new SimpleIntercessor().createIntercessor();
+    private static IEvaluator Evaluator = new SimpleEvaluator().createEvaluator();
 
     @BeforeClass
     public static void initialize() throws StructuralIntercessionException {

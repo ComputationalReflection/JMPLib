@@ -19,7 +19,7 @@ import static org.junit.Assert.fail;
 
 @ExcludeFromJMPLib
 public class GenericTest {
-    private static IIntercessor Intercessor = SimpleIntercessor.getInstance();
+    private static IIntercessor Intercessor = new SimpleIntercessor().createIntercessor();
 
     @SuppressWarnings("rawtypes")
     @Test

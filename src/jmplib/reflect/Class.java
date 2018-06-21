@@ -1,5 +1,6 @@
 package jmplib.reflect;
 
+import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import jmplib.SimpleIntercessor;
@@ -13,6 +14,7 @@ import jmplib.util.intercessor.IntercessorTypeConversion;
 import sun.reflect.CallerSensitive;
 
 import java.io.InputStream;
+import java.io.StringReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.lang.reflect.TypeVariable;
@@ -3310,82 +3312,92 @@ public class Class<T> implements java.io.Serializable, GenericDeclaration, Type,
             CompilationUnit unit = JavaParserUtils.getCompilationUnit(this.getDecoratedClass());
             return JavaParserUtils.searchTypeFromOriginalVersion(unit, this.getDecoratedClass().getName()).toString();
         }
-        StringBuffer source = new StringBuffer("");
-        Field[] fields = IntrospectionUtils.filterJMPLibFields(getDeclaredFields());
-        Method[] methods = IntrospectionUtils.filterJMPLibMethods(getDeclaredMethods());
+        try {
+            StringBuffer source = new StringBuffer("");
+            Field[] fields = IntrospectionUtils.filterJMPLibFields(getDeclaredFields());
+            Method[] methods = IntrospectionUtils.filterJMPLibMethods(getDeclaredMethods());
 
-        AnnotatedElement[] importClasses = SimpleIntercessor.getInstance().getImports(this.getDecoratedClass());
-        String[] imports = IntercessorTypeConversion.getImportString(importClasses);
-        if (imports != null) {
-            for (String imp : imports) {
-                source.append(imp);
+            AnnotatedElement[] importClasses = new SimpleIntercessor().createIntercessor().getImports(this.getDecoratedClass());
+            String[] imports = IntercessorTypeConversion.getImportString(importClasses);
+            if (imports != null) {
+                for (String imp : imports) {
+                    source.append(imp);
+                }
             }
-        }
-        source.append("\n");
-
-        printAnnotations(source, this.getAnnotations());
-
-        source.append("\n");
-        source.append(Modifier.toString(this.getModifiers()));
-        source.append(" ");
-
-        source.append("class ");
-        source.append(this.getSimpleName());
-        IntrospectionUtils.addGenericTypes(source, this.getTypeParameters());
-
-        Class superclass = getSuperclass();
-
-        if (!superclass.equals(Object.class)) {
-            source.append(" extends ");
-            source.append(superclass.getName());
-            IntrospectionUtils.addGenericTypes(source, superclass.getTypeParameters());
-        }
-        Class[] interfs = IntrospectionUtils.filterJMPLibInterfaces(this.getInterfaces());
-        if (interfs != null) {
-            if (interfs.length > 0)
-                source.append(" implements ");
-            int counter = 0;
-            for (Class interf : interfs) {
-                if (counter > 0)
-                    source.append(", ");
-                source.append(interf.getName());
-                IntrospectionUtils.addGenericTypes(source, interf.getTypeParameters());
-                counter++;
-            }
-        }
-        source.append(" {\n");
-
-        for (Field f : fields) {
-            source.append("\t");
-            source.append(Modifier.toString(f.getModifiers()));
-            source.append(" ");
-            source.append(f.getType().getSimpleName());
-            source.append(" ");
-            source.append(f.getName());
-            source.append(";");
             source.append("\n");
-        }
 
-        for (Method m : methods) {
+            printAnnotations(source, this.getAnnotations());
+
+            source.append("\n");
+            source.append(Modifier.toString(this.getModifiers()));
+            source.append(" ");
+
+            source.append("class ");
+            source.append(this.getSimpleName());
+            IntrospectionUtils.addGenericTypes(source, this.getTypeParameters());
+
+            Class superclass = getSuperclass();
+
+            if (!superclass.equals(Object.class)) {
+                source.append(" extends ");
+                source.append(superclass.getName());
+                IntrospectionUtils.addGenericTypes(source, superclass.getTypeParameters());
+            }
+            Class[] interfs = IntrospectionUtils.filterJMPLibInterfaces(this.getInterfaces());
+            if (interfs != null) {
+                if (interfs.length > 0)
+                    source.append(" implements ");
+                int counter = 0;
+                for (Class interf : interfs) {
+                    if (counter > 0)
+                        source.append(", ");
+                    source.append(interf.getName());
+                    IntrospectionUtils.addGenericTypes(source, interf.getTypeParameters());
+                    counter++;
+                }
+            }
+            source.append(" {\n");
+
+            for (Field f : fields) {
+                source.append("\t");
+                source.append(Modifier.toString(f.getModifiers()));
+                source.append(" ");
+                source.append(f.getType().getSimpleName());
+                source.append(" ");
+                source.append(f.getName());
+                source.append(";");
+                source.append("\n");
+            }
+
+            for (Method m : methods) {
+                try {
+                    String body = m.getSourceCode();
+                    printAnnotations(source, m.getAnnotations());
+                    source.append("\n\t");
+                    source.append(Modifier.toString(m.getModifiers()));
+                    source.append(" ");
+                    source.append(m.getReturnType().getSimpleName());
+                    source.append(" ");
+                    source.append(m.getName());
+                    source.append(m.getParameterString());
+                    source.append("\n\t{");
+                    source.append(indentSource(body, 2));
+                    source.append("\n\t}");
+                } catch (IllegalAccessException e) {
+                }
+            }
+            source.append("\n}\n");
+
+            return source.toString().trim();
+        }
+        catch(Exception ex) {
             try {
-                String body = m.getSourceCode();
-                printAnnotations(source, m.getAnnotations());
-                source.append("\n\t");
-                source.append(Modifier.toString(m.getModifiers()));
-                source.append(" ");
-                source.append(m.getReturnType().getSimpleName());
-                source.append(" ");
-                source.append(m.getName());
-                source.append(m.getParameterString());
-                source.append("\n\t{");
-                source.append(indentSource(body, 2));
-                source.append("\n\t}");
-            } catch (IllegalAccessException e) {
+                return SourceCodeCache.getInstance().getSourceFromSrcZipExtractor().getSourceCode(this.getName());
+            }
+            catch (Exception ex2) {
+                throw new StructuralIntercessionException(ex2.getMessage(), ex2.getCause());
             }
         }
-        source.append("\n}\n");
-
-        return source.toString().trim();
     }
 
     /**
@@ -3442,13 +3454,21 @@ public class Class<T> implements java.io.Serializable, GenericDeclaration, Type,
         }
         // Class content
         ClassContent classContent;
+        CompilationUnit unit;
 
         try {
             classContent = SourceCodeCache.getInstance().getClassContent(declaringClass);
-            CompilationUnit unit = JavaParserUtils.parse(classContent.getContent());
+            unit = JavaParserUtils.parse(classContent.getContent());
             return (ClassOrInterfaceDeclaration) JavaParserUtils.searchTypeFromOriginalVersion(unit, declaringClass.getName());
         } catch (Exception e) {
-            throw new StructuralIntercessionException(e.getMessage(), e.getCause());
+            try {
+                StringReader sr = new StringReader(SourceCodeCache.getInstance().getSourceFromSrcZipExtractor().getSourceCode(this.getName()));
+                unit = JavaParser.parse(sr, true);
+                return (ClassOrInterfaceDeclaration) JavaParserUtils.searchTypeFromOriginalVersion(unit, declaringClass.getName());
+            }
+            catch ( Exception ex2) {
+                throw new StructuralIntercessionException(e.getMessage(), e.getCause());
+            }
         }
     }
 }

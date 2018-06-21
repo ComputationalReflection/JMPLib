@@ -19,7 +19,7 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.*;
 
 public class ReplaceImplementationTest {
-    private static IIntercessor Intercessor = SimpleIntercessor.getInstance();
+    private static IIntercessor Intercessor = new SimpleIntercessor().createIntercessor();
 
     @Test
     public void testReplaceImplementation_ExistingMethod() throws StructuralIntercessionException {
@@ -425,7 +425,7 @@ public class ReplaceImplementationTest {
             assertNotNull(e.getCause());
             assertThat(e.getCause(), instanceOf(ClassNotEditableException.class));
             assertThat(e.getCause().getMessage(), equalTo("The class " + Object.class.getName() + " cannot "
-                    + "be modified because the source file is not accesible"));
+                    + "be modified because the source file is not accessible"));
         }
         IIntercessor transaction = new TransactionalIntercessor();
         try {
@@ -436,7 +436,7 @@ public class ReplaceImplementationTest {
             assertNotNull(e.getCause());
             assertThat(e.getCause(), instanceOf(ClassNotEditableException.class));
             assertThat(e.getCause().getMessage(), equalTo("The class " + Object.class.getName() + " cannot "
-                    + "be modified because the source file is not accesible"));
+                    + "be modified because the source file is not accessible"));
         }
     }
 

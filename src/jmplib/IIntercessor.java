@@ -16,6 +16,13 @@ import jmplib.reflect.TypeVariable;
  * @author Jose Manuel Redondo Lopez
  */
 public interface IIntercessor {
+
+    /**
+     * Creates an instance of the intercessor implementing this interface
+     * @return An intercessor instance
+     */
+    IIntercessor createIntercessor();
+
     /* **************************************
      * FIELDS
      **************************************/

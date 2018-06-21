@@ -1,5 +1,6 @@
 package jmplib.reflect;
 
+import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import jmplib.classversions.VersionTables;
@@ -11,6 +12,7 @@ import jmplib.util.intercessor.IntercessorTypeConversion;
 import jmplib.util.intercessor.IntercessorValidators;
 import sun.reflect.CallerSensitive;
 
+import java.io.StringReader;
 import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.*;
@@ -973,14 +975,23 @@ public class Method extends Executable {
         java.lang.Class<?> declaringClass = this.getDeclaringClass();
         // Class content
         ClassContent classContent;
+        CompilationUnit unit = null;
 
         try {
             classContent = SourceCodeCache.getInstance().getClassContent(declaringClass);
-            CompilationUnit unit = JavaParserUtils.parse(classContent.getContent());
+            unit = JavaParserUtils.parse(classContent.getContent());
             return JavaParserUtils.searchMethod(unit, declaringClass, this.getName(), this.getParameterTypes(),
                     this.getReturnType());
         } catch (Exception e) {
-            throw new StructuralIntercessionException(e.getMessage(), e.getCause());
+            try {
+                StringReader sr = new StringReader(SourceCodeCache.getInstance().getSourceFromSrcZipExtractor().getSourceCode(this.getDeclaringClass().getName()));
+                unit = JavaParser.parse(sr, true);
+                return JavaParserUtils.searchMethodFromJavaParserCU(unit, declaringClass, this.getName(), this.getParameterTypes(),
+                        this.getReturnType());
+            }
+            catch(Exception ex) {
+                throw new StructuralIntercessionException(e.getMessage(), e.getCause());
+            }
         }
     }
 

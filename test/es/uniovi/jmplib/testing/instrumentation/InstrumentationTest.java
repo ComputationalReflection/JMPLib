@@ -1,6 +1,6 @@
 package es.uniovi.jmplib.testing.instrumentation;
 
-import jmplib.DefaultEvaluator;
+import jmplib.SimpleEvaluator;
 import jmplib.IEvaluator;
 import jmplib.IIntercessor;
 import jmplib.SimpleIntercessor;
@@ -18,8 +18,8 @@ import static org.junit.Assert.assertThat;
 
 @ExcludeFromJMPLib
 public class InstrumentationTest {
-    private static IIntercessor Intercessor = SimpleIntercessor.getInstance();
-    private static IEvaluator Evaluator = DefaultEvaluator.getInstance();
+    private static IIntercessor Intercessor = new SimpleIntercessor().createIntercessor();
+    private static IEvaluator Evaluator = new SimpleEvaluator().createEvaluator();
 
     @BeforeClass
     public static void initialize() throws StructuralIntercessionException {

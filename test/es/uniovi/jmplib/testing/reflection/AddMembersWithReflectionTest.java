@@ -1,7 +1,7 @@
 package es.uniovi.jmplib.testing.reflection;
 
 import es.uniovi.jmplib.testing.reflection.classes.*;
-import jmplib.DefaultEvaluator;
+import jmplib.SimpleEvaluator;
 import jmplib.IEvaluator;
 import jmplib.IIntercessor;
 import jmplib.SimpleIntercessor;
@@ -26,8 +26,8 @@ import static org.junit.Assert.fail;
  */
 @ExcludeFromJMPLib
 public class AddMembersWithReflectionTest {
-    private static IIntercessor Intercessor = SimpleIntercessor.getInstance();
-    private static IEvaluator Evaluator = DefaultEvaluator.getInstance();
+    private static IIntercessor Intercessor = new SimpleIntercessor().createIntercessor();
+    private static IEvaluator Evaluator = new SimpleEvaluator().createEvaluator();
 
     /**
      * Adds a method to a class using the information of the method extracted from
@@ -407,7 +407,7 @@ public class AddMembersWithReflectionTest {
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Test
     public void cloneClass() {
-        IEvaluator ev = DefaultEvaluator.getInstance();
+        IEvaluator ev = new SimpleEvaluator().createEvaluator();
         Class<?> cl = null;
 
         try {
@@ -455,7 +455,7 @@ public class AddMembersWithReflectionTest {
 
     @Test
     public void createEmptyClass() {
-        IEvaluator ev = DefaultEvaluator.getInstance();
+        IEvaluator ev = new SimpleEvaluator().createEvaluator();
         Class<?> cl = null;
 
         try {

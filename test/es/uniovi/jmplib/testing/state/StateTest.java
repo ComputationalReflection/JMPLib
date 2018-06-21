@@ -16,8 +16,8 @@ import static org.junit.Assert.*;
 public class StateTest {
     static Func_Person_List listSons = null;
     static Person father, son;
-    private static IIntercessor Intercessor = SimpleIntercessor.getInstance();
-    private static IEvaluator Evaluator = DefaultEvaluator.getInstance();
+    private static IIntercessor Intercessor = new SimpleIntercessor().createIntercessor();
+    private static IEvaluator Evaluator = new SimpleEvaluator().createEvaluator();
 
     @BeforeClass
     public static void initialize() throws StructuralIntercessionException {
