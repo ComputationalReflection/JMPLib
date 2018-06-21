@@ -7,12 +7,11 @@ import java.lang.annotation.Target;
 
 /**
  * This annotations marks a method as a auxiliar library method.
- * 
- * @author Ignacio Lagartos
  *
+ * @author Ignacio Lagartos
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.METHOD, ElementType.CONSTRUCTOR })
+@Target({ElementType.METHOD, ElementType.CONSTRUCTOR})
 public @interface AuxiliaryMethod {
 
 }

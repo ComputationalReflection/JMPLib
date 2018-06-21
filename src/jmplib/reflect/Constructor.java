@@ -1,31 +1,27 @@
 package jmplib.reflect;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedType;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
-
 import jmplib.classversions.VersionTables;
 import sun.reflect.CallerSensitive;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.*;
+import java.lang.reflect.TypeVariable;
+
 public class Constructor<T> extends Executable {
-	java.lang.reflect.Constructor<T> decoratedConstructor;
-	Class<?> declaringClass;
-	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public Constructor(java.lang.reflect.Constructor<T> originalMethod) {
-		this.decoratedConstructor = originalMethod;
-		java.lang.Class<?> originalDeclaringClass = originalMethod.getDeclaringClass();
+    java.lang.reflect.Constructor<T> decoratedConstructor;
+    Class<?> declaringClass;
 
-		java.lang.Class<?> version = VersionTables.isVersionOf(originalDeclaringClass);
-		if (version == null)
-			version = originalDeclaringClass;
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public Constructor(java.lang.reflect.Constructor<T> originalMethod) {
+        this.decoratedConstructor = originalMethod;
+        java.lang.Class<?> originalDeclaringClass = originalMethod.getDeclaringClass();
 
-		this.declaringClass = new Class(version);
-	}
+        java.lang.Class<?> version = VersionTables.isVersionOf(originalDeclaringClass);
+        if (version == null)
+            version = originalDeclaringClass;
+
+        this.declaringClass = new Class(version);
+    }
 
     /**
      * {@inheritDoc}
@@ -54,12 +50,13 @@ public class Constructor<T> extends Executable {
 
     /**
      * {@inheritDoc}
+     *
      * @throws GenericSignatureFormatError {@inheritDoc}
      * @since 1.5
      */
     @Override
     public TypeVariable<java.lang.reflect.Constructor<T>>[] getTypeParameters() {
-    	return decoratedConstructor.getTypeParameters();
+        return decoratedConstructor.getTypeParameters();
     }
 
 
@@ -68,27 +65,29 @@ public class Constructor<T> extends Executable {
      */
     @Override
     public java.lang.Class<?>[] getParameterTypes() {
-    	return decoratedConstructor.getParameterTypes();
+        return decoratedConstructor.getParameterTypes();
     }
 
     /**
      * {@inheritDoc}
+     *
      * @since 1.8
      */
-    public int getParameterCount() { 
-    	return decoratedConstructor.getParameterCount();
+    public int getParameterCount() {
+        return decoratedConstructor.getParameterCount();
     }
 
     /**
      * {@inheritDoc}
-     * @throws GenericSignatureFormatError {@inheritDoc}
-     * @throws TypeNotPresentException {@inheritDoc}
+     *
+     * @throws GenericSignatureFormatError         {@inheritDoc}
+     * @throws TypeNotPresentException             {@inheritDoc}
      * @throws MalformedParameterizedTypeException {@inheritDoc}
      * @since 1.5
      */
     @Override
     public Type[] getGenericParameterTypes() {
-    	return decoratedConstructor.getTypeParameters();
+        return decoratedConstructor.getTypeParameters();
     }
 
     /**
@@ -96,20 +95,21 @@ public class Constructor<T> extends Executable {
      */
     @Override
     public java.lang.Class<?>[] getExceptionTypes() {
-    	return decoratedConstructor.getExceptionTypes();
+        return decoratedConstructor.getExceptionTypes();
     }
 
 
     /**
      * {@inheritDoc}
-     * @throws GenericSignatureFormatError {@inheritDoc}
-     * @throws TypeNotPresentException {@inheritDoc}
+     *
+     * @throws GenericSignatureFormatError         {@inheritDoc}
+     * @throws TypeNotPresentException             {@inheritDoc}
      * @throws MalformedParameterizedTypeException {@inheritDoc}
      * @since 1.5
      */
     @Override
     public Type[] getGenericExceptionTypes() {
-    	return decoratedConstructor.getTypeParameters();
+        return decoratedConstructor.getTypeParameters();
     }
 
     /**
@@ -119,15 +119,15 @@ public class Constructor<T> extends Executable {
      * same formal parameter types.
      */
     @SuppressWarnings("rawtypes")
-	public boolean equals(Object obj) {
-    	if (obj != null && obj instanceof Constructor) {
-			return this.decoratedConstructor.equals(((Constructor) obj).decoratedConstructor);
-		} else {
-			if (obj != null && obj instanceof java.lang.reflect.Constructor) {
-				return this.decoratedConstructor.equals((java.lang.reflect.Constructor) obj);
-			}
-		}
-		return false;
+    public boolean equals(Object obj) {
+        if (obj != null && obj instanceof Constructor) {
+            return this.decoratedConstructor.equals(((Constructor) obj).decoratedConstructor);
+        } else {
+            if (obj != null && obj instanceof java.lang.reflect.Constructor) {
+                return this.decoratedConstructor.equals((java.lang.reflect.Constructor) obj);
+            }
+        }
+        return false;
     }
 
     /**
@@ -136,7 +136,7 @@ public class Constructor<T> extends Executable {
      * declaring class name.
      */
     public int hashCode() {
-    	return decoratedConstructor.hashCode();
+        return decoratedConstructor.hashCode();
     }
 
     /**
@@ -159,9 +159,9 @@ public class Constructor<T> extends Executable {
      */
     public String toString() {
         return sharedToString(Modifier.constructorModifiers(),
-                              false,
-                              getParameterTypes(),
-                              getExceptionTypes());
+                false,
+                getParameterTypes(),
+                getExceptionTypes());
     }
 
     @Override
@@ -177,12 +177,12 @@ public class Constructor<T> extends Executable {
      * parameters, if any, followed by the fully-qualified name of the
      * declaring class, followed by a parenthesized, comma-separated
      * list of the constructor's generic formal parameter types.
-     *
+     * <p>
      * If this constructor was declared to take a variable number of
      * arguments, instead of denoting the last parameter as
      * "<tt><i>Type</i>[]</tt>", it is denoted as
      * "<tt><i>Type</i>...</tt>".
-     *
+     * <p>
      * A space is used to separate access modifiers from one another
      * and from the type parameters or return type.  If there are no
      * type parameters, the type parameter list is elided; if the type
@@ -199,9 +199,8 @@ public class Constructor<T> extends Executable {
      *
      * @return a string describing this {@code Constructor},
      * include type parameters
-     *
-     * @since 1.5
      * @jls 8.8.3. Constructor Modifiers
+     * @since 1.5
      */
     @Override
     public String toGenericString() {
@@ -237,120 +236,124 @@ public class Constructor<T> extends Executable {
      * created and initialized instance.
      *
      * @param initargs array of objects to be passed as arguments to
-     * the constructor call; values of primitive types are wrapped in
-     * a wrapper object of the appropriate type (e.g. a {@code float}
-     * in a {@link java.lang.Float Float})
-     *
+     *                 the constructor call; values of primitive types are wrapped in
+     *                 a wrapper object of the appropriate type (e.g. a {@code float}
+     *                 in a {@link java.lang.Float Float})
      * @return a new object created by calling the constructor
      * this object represents
-     *
-     * @exception IllegalAccessException    if this {@code Constructor} object
-     *              is enforcing Java language access control and the underlying
-     *              constructor is inaccessible.
-     * @exception IllegalArgumentException  if the number of actual
-     *              and formal parameters differ; if an unwrapping
-     *              conversion for primitive arguments fails; or if,
-     *              after possible unwrapping, a parameter value
-     *              cannot be converted to the corresponding formal
-     *              parameter type by a method invocation conversion; if
-     *              this constructor pertains to an enum type.
-     * @exception InstantiationException    if the class that declares the
-     *              underlying constructor represents an abstract class.
-     * @exception InvocationTargetException if the underlying constructor
-     *              throws an exception.
-     * @exception ExceptionInInitializerError if the initialization provoked
-     *              by this method fails.
+     * @throws IllegalAccessException      if this {@code Constructor} object
+     *                                     is enforcing Java language access control and the underlying
+     *                                     constructor is inaccessible.
+     * @throws IllegalArgumentException    if the number of actual
+     *                                     and formal parameters differ; if an unwrapping
+     *                                     conversion for primitive arguments fails; or if,
+     *                                     after possible unwrapping, a parameter value
+     *                                     cannot be converted to the corresponding formal
+     *                                     parameter type by a method invocation conversion; if
+     *                                     this constructor pertains to an enum type.
+     * @throws InstantiationException      if the class that declares the
+     *                                     underlying constructor represents an abstract class.
+     * @throws InvocationTargetException   if the underlying constructor
+     *                                     throws an exception.
+     * @throws ExceptionInInitializerError if the initialization provoked
+     *                                     by this method fails.
      */
     @CallerSensitive
-    public T newInstance(Object ... initargs)
-        throws InstantiationException, IllegalAccessException,
-               IllegalArgumentException, InvocationTargetException
-    {
-    	return decoratedConstructor.newInstance(initargs);
+    public T newInstance(Object... initargs)
+            throws InstantiationException, IllegalAccessException,
+            IllegalArgumentException, InvocationTargetException {
+        return decoratedConstructor.newInstance(initargs);
     }
 
     /**
      * {@inheritDoc}
+     *
      * @since 1.5
      */
     @Override
     public boolean isVarArgs() {
-    	return decoratedConstructor.isVarArgs();
+        return decoratedConstructor.isVarArgs();
     }
 
     /**
      * {@inheritDoc}
+     *
      * @jls 13.1 The Form of a Binary
      * @since 1.5
      */
     @Override
     public boolean isSynthetic() {
-    	return decoratedConstructor.isSynthetic();
+        return decoratedConstructor.isSynthetic();
     }
 
     /**
      * {@inheritDoc}
-     * @throws NullPointerException  {@inheritDoc}
+     *
+     * @throws NullPointerException {@inheritDoc}
      * @since 1.5
      */
     @SuppressWarnings("hiding")
-	public <T extends Annotation> T getAnnotation(java.lang.Class<T> annotationClass) {
-    	return decoratedConstructor.getAnnotation(annotationClass);
+    public <T extends Annotation> T getAnnotation(java.lang.Class<T> annotationClass) {
+        return decoratedConstructor.getAnnotation(annotationClass);
     }
 
     /**
      * {@inheritDoc}
+     *
      * @since 1.5
      */
-    public Annotation[] getDeclaredAnnotations()  {
-    	return decoratedConstructor.getDeclaredAnnotations();
+    public Annotation[] getDeclaredAnnotations() {
+        return decoratedConstructor.getDeclaredAnnotations();
     }
 
     /**
      * {@inheritDoc}
+     *
      * @since 1.5
      */
     @Override
     public Annotation[][] getParameterAnnotations() {
-    	return decoratedConstructor.getParameterAnnotations();
+        return decoratedConstructor.getParameterAnnotations();
     }
 
     /**
      * {@inheritDoc}
+     *
      * @since 1.8
      */
     @Override
     public AnnotatedType getAnnotatedReturnType() {
-    	return decoratedConstructor.getAnnotatedReturnType();
+        return decoratedConstructor.getAnnotatedReturnType();
     }
 
     /**
      * {@inheritDoc}
+     *
      * @since 1.8
      */
     @Override
     public AnnotatedType getAnnotatedReceiverType() {
-    	return decoratedConstructor.getAnnotatedReceiverType();
+        return decoratedConstructor.getAnnotatedReceiverType();
     }
 
-	@Override
-	public Parameter[] getParameters() {
-		return decoratedConstructor.getParameters();
-	}
+    @Override
+    public Parameter[] getParameters() {
+        return decoratedConstructor.getParameters();
+    }
 
-	@SuppressWarnings("hiding")
-	@Override
-	public <T extends Annotation> T[] getAnnotationsByType(java.lang.Class<T> annotationClass) {
-		return decoratedConstructor.getAnnotationsByType(annotationClass);
-	}
+    @SuppressWarnings("hiding")
+    @Override
+    public <T extends Annotation> T[] getAnnotationsByType(java.lang.Class<T> annotationClass) {
+        return decoratedConstructor.getAnnotationsByType(annotationClass);
+    }
 
-	@Override
-	public AnnotatedType[] getAnnotatedParameterTypes() {
-		return decoratedConstructor.getAnnotatedParameterTypes();
-	}
+    @Override
+    public AnnotatedType[] getAnnotatedParameterTypes() {
+        return decoratedConstructor.getAnnotatedParameterTypes();
+    }
 
-	@Override
-	public AnnotatedType[] getAnnotatedExceptionTypes() {
-		return decoratedConstructor.getAnnotatedExceptionTypes();
-	}
+    @Override
+    public AnnotatedType[] getAnnotatedExceptionTypes() {
+        return decoratedConstructor.getAnnotatedExceptionTypes();
+    }
 }

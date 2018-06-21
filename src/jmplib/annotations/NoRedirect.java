@@ -7,12 +7,11 @@ import java.lang.annotation.Target;
 
 /**
  * This annotation marks a method that does not have to be redirected.
- * 
- * @author Nacho
  *
+ * @author Ignacio Lagartos Ibañez
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.METHOD, ElementType.CONSTRUCTOR })
+@Target({ElementType.METHOD, ElementType.CONSTRUCTOR})
 public @interface NoRedirect {
 
 }

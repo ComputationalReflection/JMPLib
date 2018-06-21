@@ -256,7 +256,7 @@ public class DefaultEvaluator implements IEvaluator {
 				SourceCodeCache.getInstance().getClassContent(clazz);
 				InheritanceTables.put(clazz.getSuperclass(), clazz);
 				UpdaterAgent.updateClass(clazz);
-				DefaultIntercessor.getInstance().addField(clazz, new jmplib.reflect.Field(boolean.class, "__newclass__"));
+				SimpleIntercessor.getInstance().addField(clazz, new jmplib.reflect.Field(boolean.class, "__newclass__"));
 			}
 			source.delete();
 			return clazz;

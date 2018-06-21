@@ -1,55 +1,51 @@
 package jmplib.util;
 
+import jmplib.annotations.ExcludeFromJMPLib;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import jmplib.annotations.ExcludeFromJMPLib;
-
 /**
  * Holds the inheritance information of the modificable classes
- * 
- * @author Ignacio Lagartos
  *
+ * @author Ignacio Lagartos
  */
 @ExcludeFromJMPLib
 public class InheritanceTables {
 
-	private static Map<Integer, List<Class<?>>> subclassesCache = new HashMap<Integer, List<Class<?>>>();
+    private static Map<Integer, List<Class<?>>> subclassesCache = new HashMap<Integer, List<Class<?>>>();
 
-	/**
-	 * Add inheritance information to the inheritance tree
-	 * 
-	 * @param mother
-	 *            The mother class
-	 * @param son
-	 *            The child class
-	 */
-	public static void put(Class<?> mother, Class<?> son) {
-		Integer hascode = mother.getName().hashCode();
-		List<Class<?>> subclasses = subclassesCache.get(hascode);
-		if (subclasses == null) {
-			subclasses = new ArrayList<Class<?>>();
-			subclassesCache.put(hascode, subclasses);
-		}
-		subclasses.add(son);
-	}
+    /**
+     * Add inheritance information to the inheritance tree
+     *
+     * @param mother The mother class
+     * @param son    The child class
+     */
+    public static void put(Class<?> mother, Class<?> son) {
+        Integer hascode = mother.getName().hashCode();
+        List<Class<?>> subclasses = subclassesCache.get(hascode);
+        if (subclasses == null) {
+            subclasses = new ArrayList<Class<?>>();
+            subclassesCache.put(hascode, subclasses);
+        }
+        subclasses.add(son);
+    }
 
-	/**
-	 * Provides direct subclasses of one
-	 * 
-	 * @param clazz
-	 *            The super class
-	 * @return The direct subclasses
-	 */
-	public static List<Class<?>> getSubclasses(Class<?> clazz) {
-		Integer hascode = clazz.getName().hashCode();
-		List<Class<?>> subclasses = subclassesCache.get(hascode);
-		if (subclasses == null) {
-			subclasses = new ArrayList<Class<?>>();
-		}
-		return subclasses;
-	}
+    /**
+     * Provides direct subclasses of one
+     *
+     * @param clazz The super class
+     * @return The direct subclasses
+     */
+    public static List<Class<?>> getSubclasses(Class<?> clazz) {
+        Integer hascode = clazz.getName().hashCode();
+        List<Class<?>> subclasses = subclassesCache.get(hascode);
+        if (subclasses == null) {
+            subclasses = new ArrayList<Class<?>>();
+        }
+        return subclasses;
+    }
 
 }
