@@ -147,7 +147,7 @@ public class PrimitiveExecutor {
             } catch (IllegalArgumentException | IllegalAccessException
                     | NoSuchFieldException | SecurityException e) {
                 throw new RuntimeException(
-                        "Errors setting class version attribute", e);
+                        "Errors setting class version attribute: Did you load the JMPLib Agent when starting the application (-javaagent:./lib/jmplib.jar)?", e);
             }
         }
         UpdaterAgent.updateClass(classes.toArray(new Class<?>[0]));
