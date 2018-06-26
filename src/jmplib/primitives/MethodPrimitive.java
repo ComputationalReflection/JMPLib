@@ -1,10 +1,16 @@
 package jmplib.primitives;
 
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.expr.NameExpr;
 import jmplib.annotations.ExcludeFromJMPLib;
 import jmplib.asm.util.ASMUtils;
+import jmplib.config.JMPlibConfig;
 import jmplib.sourcecode.ClassContent;
+import jmplib.util.Templates;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -75,4 +81,44 @@ public abstract class MethodPrimitive extends AbstractPrimitive {
         return descriptor;
     }
 
+    /**
+     * Generates the body of an invoker method
+     *
+     * @param name        Method name
+     * @param paramsNames Param names
+     * @return Body of the invoker method
+     */
+    protected String getBodyInvoker(String name, String paramsNames) {
+        if (JMPlibConfig.getInstance().getConfigureAsThreadSafe()) {
+            Object[] args = {clazz.getSimpleName(), name,
+                    clazz.getSimpleName() + "_NewVersion_"
+                            + (classContent.isUpdated() ? classContent.getVersion() - 1 : classContent.getVersion()),
+                    paramsNames, (returnClass.getName().equals("void") ? "" : returnClass.getName() + " ret_value = "),
+                    (returnClass.getName().equals("void") ? "" : " return ret_value;"),
+                    clazz.getSimpleName() + "_NewVersion_0"};
+
+            return String.format(Templates.THREAD_SAFE_INVOKER_BODY_TEMPLATE, args);
+        } else {
+            Object[] args = {clazz.getSimpleName(), name,
+                    clazz.getSimpleName() + "_NewVersion_"
+                            + (classContent.isUpdated() ? classContent.getVersion() - 1 : classContent.getVersion()),
+                    paramsNames, (returnClass.getName().equals("void") ? "" : "return ")};
+            return String.format(Templates.INVOKER_BODY_TEMPLATE, args);
+        }
+    }
+
+    /**
+     * Put the exception names into the throws clause of the method
+     *
+     * @param invoker Method declaration to put exceptions in
+     */
+    protected void setThrows(MethodDeclaration invoker) {
+        if (exceptionClasses != null) {
+            List<NameExpr> list = new ArrayList<NameExpr>();
+            for (Class<?> exception : exceptionClasses) {
+                list.add(new NameExpr(exception.getName()));
+            }
+            invoker.setThrows(list);
+        }
+    }
 }

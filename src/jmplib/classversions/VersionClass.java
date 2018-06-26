@@ -6,9 +6,10 @@ package jmplib.classversions;
  * @author Ignacio Lagartos
  */
 public interface VersionClass {
+    java.util.concurrent.locks.ReadWriteLock monitor = new java.util.concurrent.locks.ReentrantReadWriteLock();
 
-    public Object get_OldVersion();
+    Object get_OldVersion();
 
-    public void set_OldVersion(Object newValue);
+    void set_OldVersion(Object newValue);
 
 }

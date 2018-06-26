@@ -33,6 +33,9 @@ public class JMPlibConfig {
     private final String polyglotPath;
     private final String javaHome;
 
+    public static final String THREAD_SAFE_OPTION = "thread_safety";
+    private boolean configureAsThreadSafe = false;
+
     private JMPlibConfig() {
         configFileExist = new File(PROPERTY_FILE_NAME).exists();
         originalClassPath = load(ORIGINAL_CLASS_PATH_KEY).orElse(DEFAULT_ORIGINAL_CLASS_PATH);
@@ -89,5 +92,13 @@ public class JMPlibConfig {
 
     public String getPathSeparator() {
         return System.getProperties().getProperty("path.separator");
+    }
+
+    public boolean getConfigureAsThreadSafe() {
+        return configureAsThreadSafe;
+    }
+
+    public void setConfigureAsThreadSafe(boolean newValue) {
+        configureAsThreadSafe = newValue;
     }
 }

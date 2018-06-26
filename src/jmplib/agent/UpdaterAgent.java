@@ -49,6 +49,10 @@ public class UpdaterAgent {
      **/
     public static void premain(String agentArgs, Instrumentation inst) {
         try {
+            if (agentArgs != null) {
+                if(agentArgs.equals(JMPlibConfig.THREAD_SAFE_OPTION))
+                    JMPlibConfig.getInstance().setConfigureAsThreadSafe(true);
+            }
             run("premain", agentArgs, inst);
         } catch (StructuralIntercessionException e) {
             throw new RuntimeException("Intrumentation error", e);

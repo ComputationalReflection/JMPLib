@@ -15,7 +15,6 @@ import jmplib.exceptions.StructuralIntercessionException;
 import jmplib.javaparser.util.JavaParserUtils;
 import jmplib.primitives.MethodPrimitive;
 import jmplib.sourcecode.ClassContent;
-import jmplib.util.Templates;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -106,23 +105,11 @@ public class AddMethodPrimitive extends MethodPrimitive {
         annotations.add(new NormalAnnotationExpr(exp, null));
         invoker = new MethodDeclaration(AddMethodPrimitive.MODIFIERS, returnType, "_" + name + "_invoker", parameter);
         invoker.setAnnotations(annotations);
-        if (exceptionClasses != null) {
-            List<NameExpr> list = new ArrayList<NameExpr>();
-            for (Class<?> exception : exceptionClasses) {
-                list.add(new NameExpr(exception.getName()));
-            }
-            invoker.setThrows(list);
-        }
+        setThrows(invoker);
 
-        Object[] args = {clazz.getSimpleName(), name,
-                clazz.getSimpleName() + "_NewVersion_"
-                        + (classContent.isUpdated() ? classContent.getVersion() - 1 : classContent.getVersion()),
-                paramsNames, (returnClass.getName().equals("void") ? "" : "return ")};
-
-        String bodyInvoker = String.format(Templates.INVOKER_BODY_TEMPLATE, args);
-
-        invoker.setBody(JavaParser.parseBlock(bodyInvoker));
+        invoker.setBody(JavaParser.parseBlock(getBodyInvoker(name, paramsNames)));
     }
+
 
     /**
      * Generates the method declaration
@@ -158,13 +145,7 @@ public class AddMethodPrimitive extends MethodPrimitive {
             declaration.setTypeParameters(mtp);
         }
 
-        if (exceptionClasses != null) {
-            List<NameExpr> list = new ArrayList<NameExpr>();
-            for (Class<?> exception : exceptionClasses) {
-                list.add(new NameExpr(exception.getName()));
-            }
-            declaration.setThrows(list);
-        }
+        setThrows(declaration);
         generateBody(body);
     }
 

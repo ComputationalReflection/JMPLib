@@ -1,18 +1,13 @@
 package jmplib.asm.visitor;
 
-import java.lang.reflect.Modifier;
-
 import jmplib.annotations.AuxiliaryMethod;
 import jmplib.annotations.ExcludeFromJMPLib;
 import jmplib.annotations.NoRedirect;
 import jmplib.asm.util.ASMUtils;
+import jmplib.config.JMPlibConfig;
+import org.objectweb.asm.*;
 
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.FieldVisitor;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
+import java.lang.reflect.Modifier;
 
 /**
  * This visitor adds _newVersion field to the class.
@@ -73,6 +68,9 @@ public class NewVersionVisitor extends ClassVisitor implements Opcodes {
         createNewInstance();
         createTransferState();
         createObjCreated();
+        //if (JMPlibConfig.getInstance().getConfigureAsThreadSafe())
+        //    createThreadSafeMonitor();
+
         super.visitEnd();
     }
 
@@ -245,4 +243,9 @@ public class NewVersionVisitor extends ClassVisitor implements Opcodes {
         setter.visitEnd();
     }
 
+    /*
+    private void createThreadSafeMonitor() {
+        FieldVisitor fv = cv.visitField(ACC_PUBLIC, "monitor", "Ljava/util/concurrent/locks/ReadWriteLock;", null, null);
+        fv.visitEnd();
+    }*/
 }

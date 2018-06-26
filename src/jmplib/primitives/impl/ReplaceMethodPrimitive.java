@@ -15,7 +15,6 @@ import jmplib.exceptions.StructuralIntercessionException;
 import jmplib.javaparser.util.JavaParserUtils;
 import jmplib.primitives.MethodPrimitive;
 import jmplib.sourcecode.ClassContent;
-import jmplib.util.Templates;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -141,15 +140,8 @@ public class ReplaceMethodPrimitive extends MethodPrimitive {
             invoker.setThrows(exceptions);
         }
 
-        Object[] args = {clazz.getSimpleName(), name,
-                clazz.getSimpleName() + "_NewVersion_"
-                        + (classContent.isUpdated() ? classContent.getVersion() - 1 : classContent.getVersion()),
-                paramsNames, (newReturnClass.getName().equals("void") ? "" : "return ")};
-
-        String bodyInvoker = String.format(Templates.INVOKER_BODY_TEMPLATE, args);
-
         try {
-            invoker.setBody(JavaParser.parseBlock(bodyInvoker));
+            invoker.setBody(JavaParser.parseBlock(getBodyInvoker(name, paramsNames)));
         } catch (ParseException e) {
             throw new StructuralIntercessionException(e.getMessage(), e);
         }
