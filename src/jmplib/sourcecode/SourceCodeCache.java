@@ -18,6 +18,7 @@ import jmplib.config.JMPlibConfig;
 import jmplib.exceptions.ClassNotEditableException;
 import jmplib.exceptions.StructuralIntercessionException;
 import jmplib.util.FileUtils;
+import jmplib.util.WrapperClassGenerator;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -44,6 +45,7 @@ public class SourceCodeCache {
     public static SourceFromSrcZipExtractor getSourceFromSrcZipExtractor() {
         return sourceFromSrcZip;
     }
+
     /**
      * The constructor creates the folder where the generated versions of the
      * classes will be located.
@@ -128,6 +130,75 @@ public class SourceCodeCache {
             return -1;
     }
 
+    private void createVersion0Class(Class<?> clazz, File file, boolean writeFile) throws ClassNotEditableException, StructuralIntercessionException, IOException {
+        String newName = clazz.getSimpleName() + "_NewVersion_0";
+        // gets the content and adding auxiliary methods and fields
+        CompilationUnit unit = null;
+        try {
+            unit = JavaParser.parse(file);
+        } catch (ParseException e) {
+            throw new ClassNotEditableException("The class cannot be parsed", e);
+        } catch (IOException e) {
+            throw new ClassNotEditableException(
+                    "The class "
+                            + clazz.getName()
+                            + " cannot be modified because the source file is not accessible",
+                    e);
+        }
+        TypeDeclaration declaration = null;
+
+        for (int i = 0; i < unit.getTypes().size(); i++) {
+            declaration = unit.getTypes().get(i);
+            if (declaration.getName().equals(clazz.getSimpleName())) break;
+            declaration = null;
+        }
+
+        if (declaration == null)
+            throw new StructuralIntercessionException("Cannot find the " + clazz.getSimpleName() + "declaration in "
+                    + file.getAbsolutePath());
+
+        declaration.getMembers().addAll(getAuxiliaryDeclarations(clazz));
+        if (declaration instanceof ClassOrInterfaceDeclaration) {
+            ClassOrInterfaceType interfaceType = new ClassOrInterfaceType(
+                    VersionClass.class.getName());
+            ((ClassOrInterfaceDeclaration) declaration).getImplements().add(
+                    interfaceType);
+            declaration.setName(newName);
+        }
+
+        /*
+         * Changes the name of the class to preliminary-version (version 0)
+         * name, this is important because this name will be changed by regex
+         * for each subsequent version
+         */
+        String newContent = unit.toStringWithoutComments();
+        //newContent = newContent.replaceFirst(clazz.getSimpleName(), newName);
+        newContent = newContent.replaceAll(
+                "(private|public|protected|package)( )+"
+                        + clazz.getSimpleName() + "\\(", "public " + newName
+                        + "(");
+
+        // Change superclass name
+        if (clazz.getSuperclass() != null)
+            newContent = newContent.replaceAll("(extends)( )+"
+                    + clazz.getSuperclass().getSimpleName(), "extends "
+                    + clazz.getSuperclass().getSimpleName() + "_NewVersion_0");
+
+
+        // Creates the folders and the file with the example path
+        File sourceFile = createFile(clazz, newName);
+        // Creates the wrapper to store the information
+        ClassContent classContent = new ClassContent();
+        classContent.setContent(newContent);
+        classContent.setUpdated(false);
+        classContent.setPath(sourceFile.getAbsolutePath());
+        classContent.setVersion(0);
+        classContent.setClazz(clazz);
+        // Caches it
+        cache.put(clazz.getName().hashCode(), classContent);
+        if (writeFile) ClassContentSerializer.serialize(classContent);
+    }
+
     /**
      * This method caches the class into the cache.
      *
@@ -141,80 +212,33 @@ public class SourceCodeCache {
             throw new ClassNotEditableException("Interfaces are not editable");
         }
         File file = null;
-        //StringReader sr = null;
-        //try {
-        // Loads the file
-        file = loadJavaFile(clazz);
-       /* } catch (Exception ex) {
+        File sfile = null;
+        String sr = null;
+        try {
+            //Loads the file
+            file = loadJavaFile(clazz);
+        } catch (Exception ex) {
             try {
+                sr = SourceCodeCache.sourceFromSrcZip.getSourceCode(clazz.getName());
 
-                Does not work
-                sr = new StringReader(SourceCodeCache.sourceFromSrcZip.getSourceCode(clazz.getName()));
+                file = WrapperClassGenerator.createFile(clazz.getName(), sr);
                 Class<?> sc = clazz.getSuperclass();
-                if (sc != Object.class)
-                {
-                    addClass(sc);
+                while (sc != Object.class) {
+                    sr = SourceCodeCache.sourceFromSrcZip.getSourceCode(sc.getName());
+                    sfile = WrapperClassGenerator.createFile(sc.getName(), sr);
+                    createVersion0Class(sc, sfile, true);
                     sc = sc.getSuperclass();
                 }
             } catch (Exception ex2) {
-                throw ex;
+                throw new ClassNotEditableException(ex.getMessage(), ex.getCause());
             }
-        }*/
-        String newName = clazz.getSimpleName() + "_NewVersion_0";
-        // gets the content and adding auxiliary methods and fields
-        CompilationUnit unit = null;
+        }
         try {
-            //if (file != null)
-            unit = JavaParser.parse(file);
-            //else
-            //    unit = JavaParser.parse(sr, false);
-
-        } catch (ParseException e) {
-            throw new ClassNotEditableException("The class cannot be parsed", e);
-        } catch (IOException e) {
-            throw new ClassNotEditableException(
-                    "The class "
-                            + clazz.getName()
-                            + " cannot be modified because the source file is not accessible",
-                    e);
+            createVersion0Class(clazz, file, true);
         }
-        TypeDeclaration declaration = unit.getTypes().get(0);
-        declaration.getMembers().addAll(getAuxiliaryDeclarations(clazz));
-        if (declaration instanceof ClassOrInterfaceDeclaration) {
-            ClassOrInterfaceType interfaceType = new ClassOrInterfaceType(
-                    VersionClass.class.getName());
-            ((ClassOrInterfaceDeclaration) declaration).getImplements().add(
-                    interfaceType);
+        catch (Exception ex) {
+            throw new ClassNotEditableException(ex.getMessage(), ex.getCause());
         }
-
-        /*
-         * Changes the name of the class to preliminary-version (version 0)
-         * name, this is important because this name will be changed by regex
-         * for each subsequent version
-         */
-        String newContent = unit.toStringWithoutComments();
-        newContent = newContent.replaceFirst(clazz.getSimpleName(), newName);
-        newContent = newContent.replaceAll(
-                "(private|public|protected|package)( )+"
-                        + clazz.getSimpleName() + "\\(", "public " + newName
-                        + "(");
-        // Change superclass name
-        if (clazz.getSuperclass() != null)
-            newContent = newContent.replaceAll("(extends)( )+"
-                    + clazz.getSuperclass().getSimpleName(), "extends "
-                    + clazz.getSuperclass().getSimpleName() + "_NewVersion_0");
-
-        // Creates the folders and the file with the example path
-        File sourceFile = createFile(clazz, newName);
-        // Creates the wrapper to store the information
-        ClassContent classContent = new ClassContent();
-        classContent.setContent(newContent);
-        classContent.setUpdated(false);
-        classContent.setPath(sourceFile.getAbsolutePath());
-        classContent.setVersion(0);
-        classContent.setClazz(clazz);
-        // Caches it
-        cache.put(clazz.getName().hashCode(), classContent);
     }
 
     /**
@@ -224,7 +248,7 @@ public class SourceCodeCache {
      * @return The list of members needed to support JMPlib versioning
      */
     private Collection<BodyDeclaration> getAuxiliaryDeclarations(Class<?> clazz) {
-        Collection<BodyDeclaration> declarations = new ArrayList<BodyDeclaration>();
+        Collection<BodyDeclaration> declarations = new ArrayList<>();
         // Auxiliary methods
         try {
             ClassReader reader = new ClassReader(Type.getInternalName(clazz));

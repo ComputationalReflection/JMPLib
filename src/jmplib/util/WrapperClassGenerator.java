@@ -782,7 +782,7 @@ public class WrapperClassGenerator {
      * @return The {@link File} object
      * @throws StructuralIntercessionException
      */
-    private static File createFile(String name, String text) throws StructuralIntercessionException {
+    public static File createFile(String name, String text) throws StructuralIntercessionException {
         File file = new File("generated_src/" + name.replace('.', '/') + ".java");
         FileWriter writer;
         try {

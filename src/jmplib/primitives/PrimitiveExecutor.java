@@ -69,6 +69,7 @@ public class PrimitiveExecutor {
         } catch (StructuralIntercessionException e) {
             // If the primitive fails, undo the changes of all primitive
             // executed previously
+            //e.printStackTrace();
             undoChanges();
             throw e;
         }
