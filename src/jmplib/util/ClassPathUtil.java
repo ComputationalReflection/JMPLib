@@ -48,6 +48,7 @@ public final class ClassPathUtil {
                 }
                 classPath.add(file);
             }
+            //classPath.add(0, new File("."));//new File("C:\\Users\\redon\\jmplib\\jmplib-dev\\generated_src"));
         }
     }
 

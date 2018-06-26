@@ -26,7 +26,7 @@ public class ClassContentSerializer {
      */
     public static File[] serialize(Collection<ClassContent> classContents)
             throws IOException {
-        List<File> files = new ArrayList<File>();
+        List<File> files = new ArrayList<>();
         for (ClassContent classContent : classContents) {
             files.add(serialize(classContent));
         }
@@ -36,7 +36,7 @@ public class ClassContentSerializer {
     /**
      * Serializes a {@link ClassContent} to {@link File}
      *
-     * @param classContents {@link ClassContent} to serialize
+     * @param classContent {@link ClassContent} to serialize
      * @return {@link File} with the serialized data
      * @throws IOException
      */

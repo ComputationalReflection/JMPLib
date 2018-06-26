@@ -72,6 +72,7 @@ public class PolyglotAdapter {
         SilentErrorQueue errorQueue = new SilentErrorQueue(100, "errors");
         JavaSourceFromString[] sources;
         try {
+            //System.out.println(ClassPathUtil.getApplicationClassPath());
             //sources = new polyglot.main.Main().start(args, errorQueue).toArray(new JavaSourceFromString[0]);
             sources = polyglothCompilerInstance.start(args, errorQueue).toArray(new JavaSourceFromString[0]);
         } catch (TerminationException e) {
