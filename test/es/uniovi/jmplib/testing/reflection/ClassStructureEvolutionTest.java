@@ -50,10 +50,10 @@ public class ClassStructureEvolutionTest {
         jmplib.reflect.Method[] afterMethods = Introspector.getClass(d).getMethods();
         jmplib.reflect.Field[] afterFields = Introspector.getClass(d).getFields();
 
-        for (jmplib.reflect.Field f: afterFields)
+        /*for (jmplib.reflect.Field f: afterFields)
             System.out.println(f.getName());
 
-        System.out.println(numFieldsBefore - 1 + ", " + afterFields.length);
+        System.out.println(numFieldsBefore - 1 + ", " + afterFields.length);*/
 
         assertTrue(numMethodsBefore + 2 == afterMethods.length);
         assertTrue(numFieldsBefore + 1 == afterFields.length);

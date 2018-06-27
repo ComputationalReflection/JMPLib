@@ -5,7 +5,6 @@ import jmplib.annotations.ExcludeFromJMPLib;
 import jmplib.classversions.VersionTables;
 import jmplib.compiler.ClassCompiler;
 import jmplib.compiler.PolyglotAdapter;
-import jmplib.config.JMPlibConfig;
 import jmplib.exceptions.CompilationFailedException;
 import jmplib.exceptions.StructuralIntercessionException;
 import jmplib.sourcecode.ClassContent;
@@ -26,10 +25,10 @@ import java.util.*;
 @ExcludeFromJMPLib
 public class PrimitiveExecutor {
 
-    private Queue<Primitive> primitives = null;
-    private Deque<Primitive> executedPrimitives = new ArrayDeque<Primitive>();
-    private Set<ClassContent> classContents = new HashSet<ClassContent>();
-    private boolean safeChange = true;
+    protected Queue<Primitive> primitives = null;
+    Deque<Primitive> executedPrimitives = new ArrayDeque<Primitive>();
+    Set<ClassContent> classContents = new HashSet<ClassContent>();
+    boolean safeChange = true;
 
     public PrimitiveExecutor(Primitive primitive) {
         if (primitive == null) {
@@ -48,7 +47,8 @@ public class PrimitiveExecutor {
 
     /**
      * Run all stored primitives
-     * @throws StructuralIntercessionException  If an error occurs when executing the primitives.
+     *
+     * @throws StructuralIntercessionException If an error occurs when executing the primitives.
      */
     private void runAllPrimitives() throws StructuralIntercessionException {
         // Execute each primitive
@@ -63,6 +63,7 @@ public class PrimitiveExecutor {
         }
         makeChangesEffective();
     }
+
     /**
      * Executes all primitives in order. If an error happens all primitives are
      * undone in inverse order. The new versions are compiled and the last
@@ -70,15 +71,10 @@ public class PrimitiveExecutor {
      *
      * @throws StructuralIntercessionException If an error occurs when executing the primitives.
      */
-    public /*synchronized*/ void executePrimitives()
+    public void executePrimitives()
             throws StructuralIntercessionException {
         try {
-            if (JMPlibConfig.getInstance().getConfigureAsThreadSafe()) {
-                synchronized (PrimitiveExecutor.class) {
-                    runAllPrimitives();
-                }
-            }
-            else runAllPrimitives();
+            runAllPrimitives();
         } catch (StructuralIntercessionException e) {
             // If the primitive fails, undo the changes of all primitive
             // executed previously
@@ -96,7 +92,7 @@ public class PrimitiveExecutor {
      *
      * @throws StructuralIntercessionException
      */
-    private void makeChangesEffective() throws StructuralIntercessionException {
+    void makeChangesEffective() throws StructuralIntercessionException {
         try {
             // Serialize the ClassContents to files
             File[] files = null;
@@ -199,7 +195,7 @@ public class PrimitiveExecutor {
      *
      * @throws StructuralIntercessionException
      */
-    private void undoChanges() throws StructuralIntercessionException {
+    void undoChanges() throws StructuralIntercessionException {
         while (!executedPrimitives.isEmpty()) {
             Primitive primitive = executedPrimitives.pop();
             primitive.undo();

@@ -1,5 +1,15 @@
 package jmplib;
 
+import jmplib.config.JMPlibConfig;
+import jmplib.exceptions.StructuralIntercessionException;
+import jmplib.primitives.*;
+import jmplib.reflect.Class;
+import jmplib.reflect.IntrospectionUtils;
+import jmplib.reflect.Introspector;
+import jmplib.reflect.TypeVariable;
+import jmplib.util.intercessor.IntercessorTypeConversion;
+import jmplib.util.intercessor.IntercessorValidators;
+
 import java.lang.invoke.MethodType;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Modifier;
@@ -9,18 +19,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.stream.Stream;
-
-import jmplib.exceptions.StructuralIntercessionException;
-import jmplib.primitives.AbstractReadPrimitive;
-import jmplib.primitives.Primitive;
-import jmplib.primitives.PrimitiveExecutor;
-import jmplib.primitives.PrimitiveFactory;
-import jmplib.reflect.Class;
-import jmplib.reflect.IntrospectionUtils;
-import jmplib.reflect.Introspector;
-import jmplib.reflect.TypeVariable;
-import jmplib.util.intercessor.IntercessorTypeConversion;
-import jmplib.util.intercessor.IntercessorValidators;
 
 /**
  * An intercessor of classes. This class is the fa�ade of JMPlib and provides
@@ -125,6 +123,7 @@ public class TransactionalIntercessor implements IIntercessor {
     /* **************************************
      * METHODS
      **************************************/
+
     /**
      * {@inheritDoc}
      */
@@ -723,7 +722,10 @@ public class TransactionalIntercessor implements IIntercessor {
     @Override
     public void commit() throws StructuralIntercessionException {
         try {
-            PrimitiveExecutor executor = new PrimitiveExecutor(primitives);
+            PrimitiveExecutor executor;
+            if (JMPlibConfig.getInstance().getConfigureAsThreadSafe())
+                executor = new ThreadSafePrimitiveExecutor(primitives);
+            else executor = new PrimitiveExecutor(primitives);
             executor.executePrimitives();
         } finally {
             primitives.clear();
