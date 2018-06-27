@@ -4,6 +4,7 @@ import jmplib.IEvaluator;
 import jmplib.IIntercessor;
 import jmplib.SimpleEvaluator;
 import jmplib.SimpleIntercessor;
+import jmplib.annotations.ExcludeFromJMPLib;
 import jmplib.config.JMPlibConfig;
 import jmplib.exceptions.StructuralIntercessionException;
 import jmplib.invokers.MemberInvokerData;
@@ -17,7 +18,7 @@ import java.util.function.Function;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 
-
+@ExcludeFromJMPLib
 public class ThreadSafetyTest {
     @Test
     public void basicThreadSafeTest() throws StructuralIntercessionException {
@@ -25,6 +26,7 @@ public class ThreadSafetyTest {
         jmplib.reflect.Class<?> cl = Introspector.decorateClass(ContainerClass.class);
 
         IIntercessor interc = new SimpleIntercessor().createIntercessor();
+
         ContainerClass obj = new ContainerClass();
 
         interc.addMethod(cl, new jmplib.reflect.Method("foo", MethodType.methodType(int.class),

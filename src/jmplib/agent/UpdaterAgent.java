@@ -50,7 +50,7 @@ public class UpdaterAgent {
     public static void premain(String agentArgs, Instrumentation inst) {
         try {
             if (agentArgs != null) {
-                if(agentArgs.equals(JMPlibConfig.THREAD_SAFE_OPTION))
+                if (agentArgs.equals(JMPlibConfig.THREAD_SAFE_OPTION))
                     JMPlibConfig.getInstance().setConfigureAsThreadSafe(true);
             }
             run("premain", agentArgs, inst);
@@ -154,7 +154,7 @@ public class UpdaterAgent {
         if (className.endsWith(".java"))
             className = className.substring(0, className.length() - ".java".length());
 
-        if (className.endsWith("package-info")) {
+        if (nonProcessedFileName(className)) {
             return;
         }
         try {
@@ -173,9 +173,22 @@ public class UpdaterAgent {
             InheritanceTables.put(clazz.getSuperclass(), clazz);
             toRetransform.add(clazz);
         } catch (ClassNotFoundException | StructuralIntercessionException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             throw new RuntimeException("Error caching classes inside the source path");
         }
+    }
+
+    /**
+     * Discards certain file names for being processed by JMPLib
+     *
+     * @param fileName File name
+     * @return If it is discarded or not
+     */
+    private static boolean nonProcessedFileName(String fileName) {
+        if (fileName.endsWith("package-info") || fileName.endsWith("module-info")) {
+            return true;
+        }
+        return false;
     }
 
     /**

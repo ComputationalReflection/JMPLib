@@ -235,7 +235,7 @@ public class SourceCodeCache {
             }
         }
         try {
-            createVersion0Class(clazz, file, true);
+            createVersion0Class(clazz, file, false);
         } catch (Exception ex) {
             throw new ClassNotEditableException(ex.getMessage(), ex.getCause());
         }
@@ -259,9 +259,9 @@ public class SourceCodeCache {
         declarations.add(createField(Modifier.PUBLIC, "_oldVersion", clazz.getName(), null));
         if (JMPlibConfig.getInstance().getConfigureAsThreadSafe()) {
             try {
-                declarations.add(createField(Modifier.PUBLIC | Modifier.STATIC, "monitor",
-                        "java.util.concurrent.locks.ReadWriteLock",
-                        JavaParser.parseExpression("new java.util.concurrent.locks.ReentrantReadWriteLock()")));
+                declarations.add(createField(Modifier.PUBLIC, Templates.JMPLIB_MONITOR_NAME,
+                        "java.util.concurrent.locks.ReadWriteLock", null));//,
+                        //JavaParser.parseExpression("new java.util.concurrent.locks.ReentrantReadWriteLock()")));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -313,7 +313,7 @@ public class SourceCodeCache {
         // Auxiliary methods
         try {
             ClassReader reader = new ClassReader(Type.getInternalName(clazz));
-            ClassCacherVisitor visitor = new ClassCacherVisitor(Opcodes.ASM4,
+            ClassCacherVisitor visitor = new ClassCacherVisitor(Opcodes.ASM5,
                     clazz);
             reader.accept(visitor, 0);
             declarations = new ArrayList<>(visitor.getDeclarations());

@@ -140,6 +140,7 @@ public class ClassCacherVisitor extends ClassVisitor {
                     clazz.getSimpleName() + "_NewVersion_0"};
             bodyGetter = String.format(
                     Templates.THREAD_SAFE_FIELD_GETTER_TEMPLATE, args);
+                    //Templates.FIELD_GETTER_TEMPLATE, args);
             bodySetter = String.format(
                     Templates.THREAD_SAFE_FIELD_SETTER_TEMPLATE, args);
         } else {

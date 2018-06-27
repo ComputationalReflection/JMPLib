@@ -1,6 +1,7 @@
 package jmplib.reflect;
 
 import jmplib.classversions.VersionTables;
+import jmplib.util.Templates;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -17,7 +18,7 @@ public class IntrospectionUtils {
             "_fieldSetter", "_unary", "Static_getter", "Static_setter");
 
     private static final List<String> jmpLibFieldNames = Arrays.asList("_oldVersion", "_newVersion",
-            "_currentInstanceVersion", "_currentClassVersion", "_objCreated");
+            "_currentInstanceVersion", "_currentClassVersion", "_objCreated", Templates.JMPLIB_MONITOR_NAME);
 
     private static final List<String> jmpLibInterfaceNames = Arrays.asList("jmplib.classversions.VersionClass");
 
@@ -178,7 +179,7 @@ public class IntrospectionUtils {
      * Removes from the passed field list those fields that are added by JMPLib, to
      * avoid reflection users to see the inner workings of our library.
      *
-     * @param methods
+     * @param fields Array of fields to filter
      * @return
      */
     public static final Field[] filterJMPLibFields(Field[] fields) {

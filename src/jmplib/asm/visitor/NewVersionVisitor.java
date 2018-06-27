@@ -5,6 +5,7 @@ import jmplib.annotations.ExcludeFromJMPLib;
 import jmplib.annotations.NoRedirect;
 import jmplib.asm.util.ASMUtils;
 import jmplib.config.JMPlibConfig;
+import jmplib.util.Templates;
 import org.objectweb.asm.*;
 
 import java.lang.reflect.Modifier;
@@ -68,8 +69,8 @@ public class NewVersionVisitor extends ClassVisitor implements Opcodes {
         createNewInstance();
         createTransferState();
         createObjCreated();
-        //if (JMPlibConfig.getInstance().getConfigureAsThreadSafe())
-        //    createThreadSafeMonitor();
+        if (JMPlibConfig.getInstance().getConfigureAsThreadSafe())
+            createThreadSafeMonitor();
 
         super.visitEnd();
     }
@@ -243,9 +244,8 @@ public class NewVersionVisitor extends ClassVisitor implements Opcodes {
         setter.visitEnd();
     }
 
-    /*
     private void createThreadSafeMonitor() {
-        FieldVisitor fv = cv.visitField(ACC_PUBLIC, "monitor", "Ljava/util/concurrent/locks/ReadWriteLock;", null, null);
+        FieldVisitor fv = cv.visitField(ACC_PUBLIC, Templates.JMPLIB_MONITOR_NAME, "Ljava/util/concurrent/locks/ReadWriteLock;", null, null);
         fv.visitEnd();
-    }*/
+    }
 }

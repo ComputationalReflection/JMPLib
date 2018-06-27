@@ -60,16 +60,6 @@ public class ConstructorVisitor extends ClassVisitor implements Opcodes {
         if (name.equals("<init>")) {
             MethodVisitor mv = super.visitMethod(access, name, desc, signature,
                     exceptions);
-            /*mv.visitCode();
-            mv.visitVarInsn(ALOAD, 0);
-            mv.visitMethodInsn(INVOKESPECIAL, "java/lang/Object", "<init>", "()V", false);
-            mv.visitVarInsn(ALOAD, 0);
-            mv.visitTypeInsn(NEW, "java/util/concurrent/locks/ReentrantReadWriteLock");
-            mv.visitInsn(DUP);
-            mv.visitMethodInsn(INVOKESPECIAL, "java/util/concurrent/locks/ReentrantReadWriteLock", "<init>", "()V", false);
-            System.out.println(className);
-            mv.visitFieldInsn(PUTFIELD, className, "monitor", "Ljava/util/concurrent/locks/ReadWriteLock;");
-            mv.visitEnd();*/
 
             mv.visitAnnotation(ASMUtils.getDescriptor(NoRedirect.class), true);
             if (abstractClass || isVersion) {

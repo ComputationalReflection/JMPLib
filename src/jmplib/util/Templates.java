@@ -12,6 +12,7 @@ import jmplib.annotations.ExcludeFromJMPLib;
 public class Templates {
     public static final String GET_OLD_VERSION_TEMPLATE = "{ return _oldVersion; }";
     public static final String SET_OLD_VERSION_TEMPLATE = "{ _oldVersion = (%s)newValue; }";
+    public static final String JMPLIB_MONITOR_NAME = "_jmplibMonitor";
 
     // New Class in cache template
     // %1$s: NewClass
@@ -40,8 +41,11 @@ public class Templates {
      * class
      */
     public static final String THREAD_SAFE_CREATOR_TEMPLATE = "{"
-            + "  %1$s.monitor.readLock().unlock();"
-            + "  %1$s.monitor.writeLock().lock();"
+          //  + "System.out.println(\"o.monitor = \" + o."  + Templates.JMPLIB_MONITOR_NAME + ");"
+          //  + "  %1$s." + Templates.JMPLIB_MONITOR_NAME + ".readLock().unlock();"
+          //  + "  %1$s." + Templates.JMPLIB_MONITOR_NAME + ".writeLock().lock();"
+            + "  o." + Templates.JMPLIB_MONITOR_NAME + ".readLock().unlock();"
+            + "  o." + Templates.JMPLIB_MONITOR_NAME + ".writeLock().lock();"
             + "  if(o.get_CurrentInstanceVersion() != o._currentClassVersion) {"
             + "  %1$s ov = null;"
             + "  try{"
@@ -53,8 +57,10 @@ public class Templates {
             + "  o.set_NewVersion(ov);"
             + "  o.set_CurrentInstanceVersion(o._currentClassVersion);"
             + "  }"
-            + "  %1$s.monitor.readLock().lock();"
-            + "  %1$s.monitor.writeLock().unlock();"
+         //   + "  %1$s." + Templates.JMPLIB_MONITOR_NAME + ".readLock().lock();"
+         //   + "  %1$s." + Templates.JMPLIB_MONITOR_NAME + ".writeLock().unlock();"
+            + "  o." + Templates.JMPLIB_MONITOR_NAME + ".readLock().lock();"
+            + "  o." + Templates.JMPLIB_MONITOR_NAME + ".writeLock().unlock();"
             + "}";
 
     // New Class in cache template
@@ -85,12 +91,14 @@ public class Templates {
      * of a cached class
      */
     public static final String THREAD_SAFE_INVOKER_BODY_TEMPLATE = "{"
-            + " %7$s.monitor.readLock().lock();"
+            //+ " %7$s." + Templates.JMPLIB_MONITOR_NAME + ".readLock().lock();"
+            + " o." + Templates.JMPLIB_MONITOR_NAME + ".readLock().lock();"
             + " if(o.get_CurrentInstanceVersion() != %1$s._currentClassVersion) {"
             + "   _creator(o);"
             + " }"
             + " %5$s((%3$s)o.get_NewVersion()).%2$s(%4$s);"
-            + " %7$s.monitor.readLock().unlock();"
+            //+ " %7$s." + Templates.JMPLIB_MONITOR_NAME + ".readLock().unlock();"
+            + " o." + Templates.JMPLIB_MONITOR_NAME + ".readLock().unlock();"
             + " %6$s"
             + "}";
 
@@ -114,11 +122,13 @@ public class Templates {
      * field of a cached class
      */
     public static final String THREAD_SAFE_FIELD_GETTER_TEMPLATE = "{"
-            + " %5$s.monitor.readLock().lock();"
+            //+ " %5$s." + Templates.JMPLIB_MONITOR_NAME + ".readLock().lock();"
+            + " o." + Templates.JMPLIB_MONITOR_NAME + ".readLock().lock();"
             + " if(o.get_CurrentInstanceVersion() != %3$s._currentClassVersion)"
             + " _creator(o);"
             + " %4$s retValue = ((%2$s)o.get_NewVersion()).%1$s;"
-            + " %5$s.monitor.readLock().unlock();"
+            //+ " %5$s." + Templates.JMPLIB_MONITOR_NAME + ".readLock().unlock();"
+            + " o." + Templates.JMPLIB_MONITOR_NAME + ".readLock().unlock();"
             + " return retValue;"
             + "}";
 
@@ -141,11 +151,13 @@ public class Templates {
      * field of a cached class
      */
     public static final String THREAD_SAFE_FIELD_SETTER_TEMPLATE = "{"
-            + " %5$s.monitor.readLock().lock();"
+            //+ " %5$s." + Templates.JMPLIB_MONITOR_NAME + ".readLock().lock();"
+            + " o." + Templates.JMPLIB_MONITOR_NAME + ".readLock().lock();"
             + "if(o.get_CurrentInstanceVersion() != %3$s._currentClassVersion)"
             + " _creator(o);"
             + "((%2$s)o.get_NewVersion()).%1$s = value;"
-            + " %5$s.monitor.readLock().unlock();"
+            //+ " %5$s." + Templates.JMPLIB_MONITOR_NAME + ".readLock().unlock();"
+            + " o." + Templates.JMPLIB_MONITOR_NAME + ".readLock().unlock();"
             + "}";
 
     // Unary method template
@@ -170,7 +182,8 @@ public class Templates {
             + "}";
 
     public static final String THREAD_SAFE_INSTANCE_FIELD_UNARY_TEMPLATE = "{"
-            + " %5$s.monitor.readLock().lock();"
+            //+ " %5$s." + Templates.JMPLIB_MONITOR_NAME + ".readLock().lock();"
+            + " o." + Templates.JMPLIB_MONITOR_NAME + ".readLock().lock();"
             + "if(o.get_CurrentInstanceVersion() != %3$s._currentClassVersion)"
             + " _creator(o);"
             + "%4$s retValue;"
@@ -190,7 +203,8 @@ public class Templates {
             + " default:"
             + "  throw new RuntimeException(\"Invalid unary type\");"
             + "}"
-            + " %5$s.monitor.readLock().unlock();"
+            //+ " %5$s." + Templates.JMPLIB_MONITOR_NAME + ".readLock().unlock();"
+            + " o." + Templates.JMPLIB_MONITOR_NAME + ".readLock().unlock();"
             + "return retValue;"
             + "}";
 
