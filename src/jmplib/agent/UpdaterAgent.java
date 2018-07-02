@@ -135,7 +135,7 @@ public class UpdaterAgent {
         String src = JMPlibConfig.getInstance().getOriginalSrcPath();
         Path srcPath = Paths.get(src);
         try (Stream<Path> stream = Files.find(srcPath, 500, (path, attr) -> String.valueOf(path).endsWith(".java"))) {
-            stream.forEach(path -> cacheClass(path, srcPath));
+            stream.parallel().forEach(path -> cacheClass(path, srcPath));
         } catch (IOException e) {
             throw new RuntimeException("Error caching classes inside the source path");
         }
@@ -173,7 +173,7 @@ public class UpdaterAgent {
             InheritanceTables.put(clazz.getSuperclass(), clazz);
             toRetransform.add(clazz);
         } catch (ClassNotFoundException | StructuralIntercessionException e) {
-            //e.printStackTrace();
+            e.printStackTrace();
             throw new RuntimeException("Error caching classes inside the source path");
         }
     }

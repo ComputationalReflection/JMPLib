@@ -92,14 +92,22 @@ public class AddMethodPrimitive extends MethodPrimitive {
         Type returnType = JavaParserUtils.transform(returnClass);
         List<Parameter> parameter = new ArrayList<Parameter>();
         parameter.add(new Parameter(JavaParserUtils.transform(clazz), new VariableDeclaratorId("o")));
-        String paramsNames = "";
+        StringBuilder sbParamsNames = new StringBuilder();
+        StringBuilder sbParamsTypes = new StringBuilder();
         for (int i = 0; i < parameterClasses.length; i++) {
             parameter.add(new Parameter(JavaParserUtils.transform(parameterClasses[i]),
                     new VariableDeclaratorId("param" + i)));
-            paramsNames += "param" + i + ", ";
+            sbParamsNames.append("param" + i + ", ");
+            sbParamsTypes.append(parameterClasses[i].getName() + ".class");
         }
+        String paramsNames = sbParamsNames.toString();
         if (!paramsNames.isEmpty())
             paramsNames = paramsNames.substring(0, paramsNames.length() - 2);
+
+        String paramTypes = sbParamsTypes.toString();
+        if (paramTypes.endsWith(", "))
+            paramTypes = paramTypes.substring(0, paramTypes.length() - 2);
+
         List<AnnotationExpr> annotations = new ArrayList<AnnotationExpr>();
         NameExpr exp = JavaParserUtils.classToNameExpr(AuxiliaryMethod.class);
         annotations.add(new NormalAnnotationExpr(exp, null));
@@ -107,7 +115,7 @@ public class AddMethodPrimitive extends MethodPrimitive {
         invoker.setAnnotations(annotations);
         setThrows(invoker);
 
-        invoker.setBody(JavaParser.parseBlock(getBodyInvoker(name, paramsNames)));
+        invoker.setBody(JavaParser.parseBlock(getBodyInvoker(name, paramsNames, paramTypes)));
     }
 
 

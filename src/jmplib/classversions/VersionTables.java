@@ -1,11 +1,10 @@
 package jmplib.classversions;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import jmplib.annotations.ExcludeFromJMPLib;
+import jmplib.config.JMPlibConfig;
 
 /**
  * This class stores a map composed by a class (using its full name) and the
@@ -16,9 +15,21 @@ import jmplib.annotations.ExcludeFromJMPLib;
  */
 @ExcludeFromJMPLib
 public class VersionTables {
-    private static final Map<Integer, Class<?>> versions = new HashMap<Integer, Class<?>>();
-    private static final Map<Integer, Class<?>> versionOf = new HashMap<Integer, Class<?>>();
-    private static final Map<Integer, List<Class<?>>> allVersions = new HashMap<Integer, List<Class<?>>>();
+    private static final Map<Integer, Class<?>> versions;
+    private static final Map<Integer, Class<?>> versionOf;
+    private static final Map<Integer, List<Class<?>>> allVersions;
+    static {
+        if (JMPlibConfig.getInstance().getConfigureAsThreadSafe()) {
+            versions = new ConcurrentHashMap<>();
+            versionOf = new ConcurrentHashMap<>();
+            allVersions = new ConcurrentHashMap<>();
+        }
+        else {
+            versions = new HashMap<>();
+            versionOf = new HashMap<>();
+            allVersions = new HashMap<>();
+        }
+    }
     public static final boolean DEBUG = false;
 
     /**
@@ -90,7 +101,6 @@ public class VersionTables {
         if (ret != null)
             return ret;
         return null;
-
     }
 
     /**

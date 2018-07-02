@@ -217,14 +217,21 @@ public class ClassCacherVisitor extends ClassVisitor {
         parameter.add(new Parameter(new ClassOrInterfaceType(clazz.getName()),
                 new VariableDeclaratorId("o")));
         Type[] types = Type.getArgumentTypes(desc);
-        String paramsNames = "";
+        StringBuilder sbParamsNames = new StringBuilder();
+        StringBuilder sbParamsTypes = new StringBuilder();
         for (int i = 0; i < types.length; i++) {
             parameter.add(new Parameter(new ClassOrInterfaceType(types[i]
                     .getClassName()), new VariableDeclaratorId("param" + i)));
-            paramsNames += "param" + i + ", ";
+            sbParamsNames.append("param" + i + ", ");
+            sbParamsTypes.append(types[i].getClassName() + ".class, ");
         }
+        String paramsNames = sbParamsNames.toString();
+        String paramTypes = sbParamsTypes.toString();
         if (!paramsNames.isEmpty())
             paramsNames = paramsNames.substring(0, paramsNames.length() - 2);
+        if (paramTypes.endsWith(", "))
+            paramTypes = paramTypes.substring(0, paramTypes.length() - 2);
+
         List<AnnotationExpr> annotations = new ArrayList<>();
         annotations.add(new NormalAnnotationExpr(new NameExpr(
                 AuxiliaryMethod.class.getName()),
@@ -243,11 +250,15 @@ public class ClassCacherVisitor extends ClassVisitor {
 
         String bodyInvoker;
         if (JMPlibConfig.getInstance().getConfigureAsThreadSafe()) {
-            Object[] args = {clazz.getSimpleName(), name,
-                    clazz.getSimpleName() + "_NewVersion_0", paramsNames,
-                    (returnClassName.equals("void") ? "" : returnClassName + " ret_value = "),
-                    (returnClassName.equals("void") ? "" : " return ret_value;"),
-                    clazz.getSimpleName() + "_NewVersion_0"};
+            Object[] args = {clazz.getSimpleName(), //%1
+                    name, //%2
+                    clazz.getSimpleName() + "_NewVersion_0", //%3
+                    paramsNames, //%4
+                    (returnClassName.equals("void") ? "" : returnClassName + " ret_value = "), //%5
+                    (returnClassName.equals("void") ? "" : " return ret_value;"), //%6
+                    (returnClassName.equals("void") ? "" : "(" + returnClassName+")"), //%7
+                    (paramsNames.equals("") ? "" : ", " + paramsNames), //%8
+                    (paramTypes.equals("") ? "" : ", " + paramTypes)}; //%9
             bodyInvoker = String.format(
                     Templates.THREAD_SAFE_INVOKER_BODY_TEMPLATE, args);
         } else {

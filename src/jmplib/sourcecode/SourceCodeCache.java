@@ -108,7 +108,12 @@ public class SourceCodeCache {
         if (classContent != null)
             return classContent;
         try {
-            addClass(clazz);
+            if (JMPlibConfig.getInstance().getConfigureAsThreadSafe()) {
+                synchronized (this) {
+                    addClass(clazz);
+                }
+            }
+            else addClass(clazz);
         } catch (ClassNotEditableException e) {
             throw new StructuralIntercessionException(e.getMessage(), e);
         }
@@ -212,9 +217,9 @@ public class SourceCodeCache {
         if (clazz.isInterface()) {
             throw new ClassNotEditableException("Interfaces are not editable");
         }
-        File file = null;
-        File sfile = null;
-        String sr = null;
+        File file;
+        File sfile;
+        String sr;
         try {
             //Loads the file
             file = loadJavaFile(clazz);
@@ -261,7 +266,7 @@ public class SourceCodeCache {
             try {
                 declarations.add(createField(Modifier.PUBLIC, Templates.JMPLIB_MONITOR_NAME,
                         "java.util.concurrent.locks.ReadWriteLock", null));//,
-                        //JavaParser.parseExpression("new java.util.concurrent.locks.ReentrantReadWriteLock()")));
+                //JavaParser.parseExpression("new java.util.concurrent.locks.ReentrantReadWriteLock()")));
             } catch (Exception e) {
                 e.printStackTrace();
             }

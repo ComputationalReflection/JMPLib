@@ -301,7 +301,7 @@ public class WrapperClassGenerator {
      * @param parameters  Parameter types
      * @param returnType  Return type
      * @param invokerName Name of the method
-     * @param targetClass Class that owns the field
+     * @param lastVersion Class that owns the field
      * @param methodName  The method name
      * @param genericMap  Map with the generic parameters and generic return
      * @return The {@link MethodDeclaration} built
@@ -318,12 +318,12 @@ public class WrapperClassGenerator {
         }
         MethodDeclaration method = new MethodDeclaration(MODIFIERS, retClassOrInt, invokerName);
 
-        String code = "";
-        code = code.concat(returnType.equals(void.class) ? "" : "return ");
-        code = code.concat(lastVersion.getName());
-        code = code.concat(".");
-        code = code.concat(methodName);
-        code = code.concat("(");
+        StringBuilder code = new StringBuilder();
+        code = code.append(returnType.equals(void.class) ? "" : "return ");
+        code = code.append(lastVersion.getName());
+        code = code.append(".");
+        code = code.append(methodName);
+        code = code.append("(");
         for (int i = 0; i < parameters.length; i++) {
             String paramName = "param" + i;
             ClassOrInterfaceType type;
@@ -334,13 +334,13 @@ public class WrapperClassGenerator {
             }
             Parameter param = ASTHelper.createParameter(type, paramName);
             ASTHelper.addParameter(method, param);
-            code = code.concat(paramName);
-            code = code.concat(",");
+            code = code.append(paramName);
+            code = code.append(",");
         }
-        code = code.substring(0, code.length() - 1);
-        code = code.concat(");");
+        String scode = code.substring(0, code.length() - 1);
+        scode = scode.concat(");");
         try {
-            method.setBody(JavaParser.parseBlock("{" + code + "}"));
+            method.setBody(JavaParser.parseBlock("{" + scode + "}"));
         } catch (ParseException e) {
             throw new StructuralIntercessionException(e.getMessage(), e);
         }
@@ -371,25 +371,25 @@ public class WrapperClassGenerator {
         }
         method = new MethodDeclaration(MODIFIERS, retClassOrInt, invokerName);
 
-        String code = "";
-        code = code.concat(returnType.equals(void.class) ? "" : "return ");
+        StringBuilder code = new StringBuilder();
+        code = code.append(returnType.equals(void.class) ? "" : "return ");
         boolean hasNewVersion = VersionTables.hasNewVersion(targetClass);
         if (!hasNewVersion) {
-            code = code.concat("param0.");
-            code = code.concat(methodName);
-            code = code.concat("(");
+            code = code.append("param0.");
+            code = code.append(methodName);
+            code = code.append("(");
         } else {
             Class<?> lastVersion = VersionTables.getNewVersion(targetClass);
-            code = code.concat(lastVersion.getName());
-            code = code.concat("._");
-            code = code.concat(methodName);
-            code = code.concat("_invoker(");
+            code = code.append(lastVersion.getName());
+            code = code.append("._");
+            code = code.append(methodName);
+            code = code.append("_invoker(");
         }
         for (int i = 0; i < parameters.length; i++) {
             String paramName = "param" + i;
             if (i != 0 || hasNewVersion) {
-                code = code.concat(paramName);
-                code = code.concat(",");
+                code = code.append(paramName);
+                code = code.append(",");
             }
             ClassOrInterfaceType type;
             if (genericMap[i]) {
@@ -400,10 +400,14 @@ public class WrapperClassGenerator {
             Parameter param = ASTHelper.createParameter(type, paramName);
             ASTHelper.addParameter(method, param);
         }
-        code = code.substring(0, code.length() - 1);
-        code = code.concat(");");
+        String scode;
+        if ((parameters.length == 1) && !hasNewVersion)
+            scode = code.toString();
+        else scode = code.substring(0, code.length() - 1);
+
+        scode = scode.concat(");");
         try {
-            method.setBody(JavaParser.parseBlock("{" + code + "}"));
+            method.setBody(JavaParser.parseBlock("{" + scode + "}"));
         } catch (ParseException e) {
             throw new StructuralIntercessionException(e.getMessage(), e);
         }

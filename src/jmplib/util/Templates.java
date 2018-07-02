@@ -42,11 +42,12 @@ public class Templates {
      */
     public static final String THREAD_SAFE_CREATOR_TEMPLATE = "{"
           //  + "System.out.println(\"o.monitor = \" + o."  + Templates.JMPLIB_MONITOR_NAME + ");"
-          //  + "  %1$s." + Templates.JMPLIB_MONITOR_NAME + ".readLock().unlock();"
-          //  + "  %1$s." + Templates.JMPLIB_MONITOR_NAME + ".writeLock().lock();"
+            //+ "  %1$s." + Templates.JMPLIB_MONITOR_NAME + ".readLock().unlock();"
+            //+ "  %1$s." + Templates.JMPLIB_MONITOR_NAME + ".writeLock().lock();"
             + "  o." + Templates.JMPLIB_MONITOR_NAME + ".readLock().unlock();"
             + "  o." + Templates.JMPLIB_MONITOR_NAME + ".writeLock().lock();"
-            + "  if(o.get_CurrentInstanceVersion() != o._currentClassVersion) {"
+
+            + "  if(o.get_CurrentInstanceVersion() < o._currentClassVersion) {"
             + "  %1$s ov = null;"
             + "  try{"
             + "   ov = (%1$s) o._createInstance();"
@@ -56,11 +57,12 @@ public class Templates {
             + "  ov.set_OldVersion(o);\n"
             + "  o.set_NewVersion(ov);"
             + "  o.set_CurrentInstanceVersion(o._currentClassVersion);"
-            + "  }"
-         //   + "  %1$s." + Templates.JMPLIB_MONITOR_NAME + ".readLock().lock();"
-         //   + "  %1$s." + Templates.JMPLIB_MONITOR_NAME + ".writeLock().unlock();"
+
+            //+ "  %1$s." + Templates.JMPLIB_MONITOR_NAME + ".readLock().lock();"
+            //+ "  %1$s." + Templates.JMPLIB_MONITOR_NAME + ".writeLock().unlock();"
             + "  o." + Templates.JMPLIB_MONITOR_NAME + ".readLock().lock();"
             + "  o." + Templates.JMPLIB_MONITOR_NAME + ".writeLock().unlock();"
+            + "  }"
             + "}";
 
     // New Class in cache template
@@ -91,16 +93,49 @@ public class Templates {
      * of a cached class
      */
     public static final String THREAD_SAFE_INVOKER_BODY_TEMPLATE = "{"
-            //+ " %7$s." + Templates.JMPLIB_MONITOR_NAME + ".readLock().lock();"
             + " o." + Templates.JMPLIB_MONITOR_NAME + ".readLock().lock();"
-            + " if(o.get_CurrentInstanceVersion() != %1$s._currentClassVersion) {"
+            + "synchronized(jmplib.primitives.ThreadSafePrimitiveExecutor.class) {"
+            + " Class<?> cl = jmplib.classversions.VersionTables.getNewVersion(%1$s.class);"
+            +  "if (%3$s.class != cl){"
+            +  "       "
+            +  "       try {"
+            +  "        o." + Templates.JMPLIB_MONITOR_NAME + ".readLock().unlock();  "
+            +  "        %5$s %7$s cl.getMethod(\"_%2$s_invoker\", %1$s.class%9$s).invoke(cl, o%8$s);"
+            + "         %6$s"
+            +  "       } catch (Exception ex) {ex.printStackTrace();}"
+            + "  }"
+
+            + " if(o.get_CurrentInstanceVersion() < %1$s._currentClassVersion) {"
+            + "   _creator(o);"
+            + " }"
+            + " %5$s((%3$s)o.get_NewVersion()).%2$s(%4$s);"
+            + " o." + Templates.JMPLIB_MONITOR_NAME + ".readLock().unlock();"
+            + " %6$s"
+            + "}"
+            + "}";
+
+  /*          //+ " %7$s." + Templates.JMPLIB_MONITOR_NAME + ".readLock().lock();"
+            + " o." + Templates.JMPLIB_MONITOR_NAME + ".readLock().lock();"
+            + "synchronized(jmplib.primitives.ThreadSafePrimitiveExecutor.class) {"
+            + " Class<?> cl = jmplib.classversions.VersionTables.getNewVersion(%1$s.class);"
+            +  "if (%3$s.class != cl){"
+            +  "       "
+            +  "       try {"
+            +  "        o." + Templates.JMPLIB_MONITOR_NAME + ".readLock().unlock();  "
+            +  "        int ret_value = (int) cl.getMethod(\"_%2$s\" + \"_invoker\", %1$s.class).invoke(cl, o);"
+            + "         return ret_value;"
+            +  "       } catch (Exception ex) {ex.printStackTrace();}"
+            + "  }"
+
+            + " if(o.get_CurrentInstanceVersion() < %1$s._currentClassVersion) {"
             + "   _creator(o);"
             + " }"
             + " %5$s((%3$s)o.get_NewVersion()).%2$s(%4$s);"
             //+ " %7$s." + Templates.JMPLIB_MONITOR_NAME + ".readLock().unlock();"
             + " o." + Templates.JMPLIB_MONITOR_NAME + ".readLock().unlock();"
             + " %6$s"
-            + "}";
+            + "}"
+            + "}";*/
 
 
     // New Class in cache template

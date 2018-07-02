@@ -26,8 +26,8 @@ import java.util.*;
 public class PrimitiveExecutor {
 
     protected Queue<Primitive> primitives = null;
-    Deque<Primitive> executedPrimitives = new ArrayDeque<Primitive>();
-    Set<ClassContent> classContents = new HashSet<ClassContent>();
+    Deque<Primitive> executedPrimitives = new ArrayDeque<>();
+    Set<ClassContent> classContents = new HashSet<>();
     boolean safeChange = true;
 
     public PrimitiveExecutor(Primitive primitive) {
@@ -50,7 +50,7 @@ public class PrimitiveExecutor {
      *
      * @throws StructuralIntercessionException If an error occurs when executing the primitives.
      */
-    private void runAllPrimitives() throws StructuralIntercessionException {
+    void runAllPrimitives() throws StructuralIntercessionException {
         // Execute each primitive
         while (!primitives.isEmpty()) {
             Primitive primitive = primitives.poll();
@@ -101,6 +101,8 @@ public class PrimitiveExecutor {
             else
                 files = ClassContentSerializer.serialize(SourceCodeCache
                         .getInstance().getAll());
+
+            //System.out.println(files.length);
             // Instrument with Polyglot
             // files = PolyglotAdapter.instrument(files);
             JavaSourceFromString[] instrumented = PolyglotAdapter
@@ -195,7 +197,7 @@ public class PrimitiveExecutor {
      *
      * @throws StructuralIntercessionException
      */
-    void undoChanges() throws StructuralIntercessionException {
+    private void undoChanges() throws StructuralIntercessionException {
         while (!executedPrimitives.isEmpty()) {
             Primitive primitive = executedPrimitives.pop();
             primitive.undo();

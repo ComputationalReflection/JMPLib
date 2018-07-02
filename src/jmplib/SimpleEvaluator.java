@@ -2,8 +2,10 @@ package jmplib;
 
 import com.github.javaparser.ParseException;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
+import com.github.javaparser.ast.expr.NameExpr;
 import jmplib.agent.UpdaterAgent;
 import jmplib.compiler.ClassCompiler;
 import jmplib.compiler.PolyglotAdapter;
@@ -46,9 +48,14 @@ public class SimpleEvaluator implements IEvaluator {
      * {@inheritDoc}
      */
     public IEvaluator createEvaluator() {
-        if (_instance == null)
-            _instance = new SimpleEvaluator();
+        if (_instance == null) {
+            if (JMPlibConfig.getInstance().getConfigureAsThreadSafe()) {
+                _instance = new ThreadSafeSimpleEvaluator();
+            } else {
 
+                _instance = new SimpleEvaluator();
+            }
+        }
         return _instance;
     }
 
@@ -216,13 +223,25 @@ public class SimpleEvaluator implements IEvaluator {
         try {
             boolean inheritance = false;
             CompilationUnit unit = JavaParserUtils.parse(classSource);
-            String pack = unit.getPackage().getName().toString();
+            String pack = "";
+            try {
+                pack = unit.getPackage().getName().toString();
+            } catch (Exception ex) {
+                unit.setPackage(new PackageDeclaration(new NameExpr("empty")));
+                pack = unit.getPackage().getName().toString();
+            }
+
             TypeDeclaration type = unit.getTypes().get(0);
             if (type instanceof ClassOrInterfaceDeclaration) {
                 ClassOrInterfaceDeclaration decl = (ClassOrInterfaceDeclaration) type;
                 inheritance = decl.getExtends() != null && decl.getExtends().size() > 0;
             }
-            String name = pack + "." + type.getName();
+            String name;
+            if (pack.equals(""))
+                name = type.getName();
+            else
+                name = pack + "." + type.getName();
+
             String originalSrcPath = JMPlibConfig.getInstance().getOriginalSrcPath();
             source = new File(originalSrcPath.concat(name.replace('.', '/').concat(".java")));
             if (!source.exists()) {

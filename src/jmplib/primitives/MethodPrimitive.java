@@ -88,14 +88,16 @@ public abstract class MethodPrimitive extends AbstractPrimitive {
      * @param paramsNames Param names
      * @return Body of the invoker method
      */
-    protected String getBodyInvoker(String name, String paramsNames) {
+    protected String getBodyInvoker(String name, String paramsNames, String paramTypes) {
         if (JMPlibConfig.getInstance().getConfigureAsThreadSafe()) {
             Object[] args = {clazz.getSimpleName(), name,
                     clazz.getSimpleName() + "_NewVersion_"
                             + (classContent.isUpdated() ? classContent.getVersion() - 1 : classContent.getVersion()),
                     paramsNames, (returnClass.getName().equals("void") ? "" : returnClass.getName() + " ret_value = "),
                     (returnClass.getName().equals("void") ? "" : " return ret_value;"),
-                    clazz.getSimpleName() + "_NewVersion_0"};
+                    (returnClass.getName().equals("void") ? "" : "(" + returnClass.getName()+")"),
+                    (paramsNames.equals("") ? "" : ", " + paramsNames), //%8
+                    (paramTypes.equals("") ? "" : ", " + paramTypes)}; //%9
 
             return String.format(Templates.THREAD_SAFE_INVOKER_BODY_TEMPLATE, args);
         } else {
