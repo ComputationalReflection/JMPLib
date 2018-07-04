@@ -19,6 +19,7 @@ import jmplib.classversions.VersionTables;
 import jmplib.exceptions.StructuralIntercessionException;
 import jmplib.javaparser.util.JavaParserUtils;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -788,13 +789,13 @@ public class WrapperClassGenerator {
      */
     public static File createFile(String name, String text) throws StructuralIntercessionException {
         File file = new File("generated_src/" + name.replace('.', '/') + ".java");
-        FileWriter writer;
+        BufferedWriter writer;
         try {
             if (!file.getParentFile().exists())
                 file.getParentFile().mkdirs();
             file.createNewFile();
-            writer = new FileWriter(file, false);
-            writer.append(text);
+            writer = new BufferedWriter(new FileWriter(file, false));
+            writer.write(text);
             writer.close();
         } catch (IOException e) {
             throw new StructuralIntercessionException(e.getMessage(), e);

@@ -21,17 +21,30 @@ public class Templates {
      * This template generates the code to generate the creator of a cached
      * class
      */
-    public static final String CREATOR_TEMPLATE = "{"
-            + "  %1$s ov = null;"
-            + "  try{"
-            + "   ov = (%1$s) o._createInstance();"
-            + "  }catch (Exception e) {e.printStackTrace();}"
-            + "  Object oldVersion = o.get_NewVersion() == null? o: o.get_NewVersion();"
-            + "  " + TransferState.class.getName() + ".transferState(oldVersion, ov);"
-            + "  ov.set_OldVersion(o);\n"
-            + "  o.set_NewVersion(ov);"
-            + "  o.set_CurrentInstanceVersion(o._currentClassVersion);"
-            + "}";
+    public static final String CREATOR_TEMPLATE = String.join("\n",
+            "{"
+            , "  %1$s ov = null;"
+            , "  try{"
+            , "       ov = (%1$s) o._createInstance();"
+            , "  }catch (Exception e) {e.printStackTrace();}"
+            , "  Object oldVersion = o.get_NewVersion() == null? o: o.get_NewVersion();"
+            , "  " + TransferState.class.getName() + ".transferState(oldVersion, ov);"
+            , "  ov.set_OldVersion(o);\n"
+            , "  o.set_NewVersion(ov);"
+            , "  o.set_CurrentInstanceVersion(o._currentClassVersion);"
+            , "}");
+
+//    public static final String CREATOR_TEMPLATE = "{"
+//            + "  %1$s ov = null;"
+//            + "  try{"
+//            + "   ov = (%1$s) o._createInstance();"
+//            + "  }catch (Exception e) {e.printStackTrace();}"
+//            + "  Object oldVersion = o.get_NewVersion() == null? o: o.get_NewVersion();"
+//            + "  " + TransferState.class.getName() + ".transferState(oldVersion, ov);"
+//            + "  ov.set_OldVersion(o);\n"
+//            + "  o.set_NewVersion(ov);"
+//            + "  o.set_CurrentInstanceVersion(o._currentClassVersion);"
+//            + "}";
 
     // New Class in cache template
     // %1$s: NewClass
