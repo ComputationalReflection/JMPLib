@@ -4,7 +4,6 @@ import jmplib.*;
 import jmplib.annotations.ExcludeFromJMPLib;
 import jmplib.config.JMPlibConfig;
 import jmplib.exceptions.StructuralIntercessionException;
-import jmplib.invokers.EvalInvokerData;
 import jmplib.invokers.MemberInvokerData;
 import jmplib.reflect.Introspector;
 import org.junit.Test;
@@ -20,7 +19,7 @@ import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
 
 @ExcludeFromJMPLib
-public class ThreadSafetyTest {
+public class ThreadSafetyMethodTest {
     @Test
     public void basicThreadSafeTest() throws StructuralIntercessionException {
         assertTrue(JMPlibConfig.getInstance().getConfigureAsThreadSafe());
@@ -559,45 +558,54 @@ public class ThreadSafetyTest {
     }
 
 
-    //Concurrent eval
+    //Multiple invoker test
     @Test
-    public void concurrentEval() throws StructuralIntercessionException, InterruptedException {
+    public void concurrentInvokersTest() throws StructuralIntercessionException, InterruptedException {
         assertTrue(JMPlibConfig.getInstance().getConfigureAsThreadSafe());
-        jmplib.reflect.Class<?> cl = Introspector.decorateClass(ContainerClass9.class);
+        jmplib.reflect.Class<?> cl = Introspector.decorateClass(ContainerClass10.class);
 
-        IEvaluator evaluator = new SimpleEvaluator().createEvaluator();
+        IIntercessor interc1 = new SimpleIntercessor().createIntercessor();
 
+        ContainerClass10 obj = new ContainerClass10();
         int limit = 20;
+
+        try {
+            int i = 0;
+            while (i < limit) {
+                interc1.addMethod(cl, new jmplib.reflect.Method("foo" + i, MethodType.methodType(int.class),
+                        "return 10;", Modifier.PUBLIC));
+                i++;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            fail();
+        }
 
 
         Runnable taskA = () -> {
             try {
+                IEvaluator evaluator = new SimpleEvaluator().createEvaluator();
                 int i = 0;
                 while (i < limit) {
-                    Function<Double, Double> code = evaluator.generateEvalInvoker(
-                            "(a+a)*(a+a)",
-                            new EvalInvokerData<Function>(Function.class, new String[]{"a"}, double.class, double.class)
-                    );
-                    assertEquals((i + i) * (i + i), code.apply((double) i), 0.1);
+                    Function<ContainerClass10, Integer> newSize = evaluator.getMethodInvoker(ContainerClass10.class, "foo" + i,
+                            new MemberInvokerData<>(Function.class, ContainerClass10.class, int.class));
+                    assertEquals(10, (int) newSize.apply(obj));
                     i++;
                 }
-
             } catch (Exception ex) {
                 ex.printStackTrace();
                 fail();
             }
-
         };
 
         Runnable taskB = () -> {
             try {
+                IEvaluator evaluator = new SimpleEvaluator().createEvaluator();
                 int i = 0;
                 while (i < limit) {
-                    Function<Double, Double> code = evaluator.generateEvalInvoker(
-                            "(b*b)+(b*b)",
-                            new EvalInvokerData<Function>(Function.class, new String[]{"b"}, double.class, double.class)
-                    );
-                    assertEquals((i * i) + (i * i), code.apply((double) i), 0.1);
+                    Function<ContainerClass10, Integer> newSize = evaluator.getMethodInvoker(ContainerClass10.class, "foo" + i,
+                            new MemberInvokerData<>(Function.class, ContainerClass10.class, int.class));
+                    assertEquals(10, (int) newSize.apply(obj));
                     i++;
                 }
             } catch (Exception ex) {
@@ -614,46 +622,59 @@ public class ThreadSafetyTest {
         t2.start();
         t.join();
         t2.join();
+
     }
 
-    //Concurrent exec
+    //Multiple invoker test to an added method
+    private final AtomicBoolean running5 = new AtomicBoolean(false);
+
     @Test
-    public void concurrentExec() throws StructuralIntercessionException, InterruptedException {
+    public void concurrentInvokerToAddedMethodTest() throws StructuralIntercessionException, InterruptedException {
         assertTrue(JMPlibConfig.getInstance().getConfigureAsThreadSafe());
-        jmplib.reflect.Class<?> cl = Introspector.decorateClass(ContainerClass9.class);
+        jmplib.reflect.Class<?> cl = Introspector.decorateClass(ContainerClass11.class);
 
-        IEvaluator evaluator = new SimpleEvaluator().createEvaluator();
+        IIntercessor interc1 = new SimpleIntercessor().createIntercessor();
 
+        ContainerClass11 obj = new ContainerClass11();
         int limit = 20;
-
 
         Runnable taskA = () -> {
             try {
                 int i = 0;
                 while (i < limit) {
-                    Class dynclass = evaluator.exec("package es.uniovi.jmplib.testing.thread_safety;\npublic class DynClass" + i + "{}");
-                    assertEquals("DynClass" + i, dynclass.getSimpleName());
+                    interc1.addMethod(cl, new jmplib.reflect.Method("foo" + i, MethodType.methodType(int.class),
+                            "return 10;", Modifier.PUBLIC));
                     i++;
                 }
+                running5.set(true);
+
 
             } catch (Exception ex) {
-                ex.printStackTrace();
-                fail();
             }
-
         };
 
         Runnable taskB = () -> {
             try {
+                IEvaluator evaluator = new SimpleEvaluator().createEvaluator();
                 int i = 0;
                 while (i < limit) {
-                    Class dynclass = evaluator.exec("package es.uniovi.jmplib.testing.thread_safety;\npublic class DynClassB" + i + "{}");
-                    assertEquals("DynClassB" + i, dynclass.getSimpleName());
+                    Function<ContainerClass11, Integer> newSize = evaluator.getMethodInvoker(ContainerClass11.class, "foo" + i,
+                            new MemberInvokerData<>(Function.class, ContainerClass11.class, int.class));
+                    assertEquals(10, (int) newSize.apply(obj));
                     i++;
                 }
+                while (!running5.get())
+                    Thread.sleep(100);
+                try {
+                    Function<ContainerClass11, Integer> newSize = evaluator.getMethodInvoker(ContainerClass11.class, "foo" + (limit - 1),
+                            new MemberInvokerData<>(Function.class, ContainerClass11.class, int.class));
+                    assertEquals(10, (int) newSize.apply(obj));
+                } catch (Exception ex2) {
+                    ex2.printStackTrace();
+                    fail();
+                }
             } catch (Exception ex) {
-                ex.printStackTrace();
-                fail();
+
             }
         };
 
@@ -665,5 +686,6 @@ public class ThreadSafetyTest {
         t2.start();
         t.join();
         t2.join();
+
     }
 }

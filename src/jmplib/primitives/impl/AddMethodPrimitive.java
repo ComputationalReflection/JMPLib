@@ -31,7 +31,7 @@ public class AddMethodPrimitive extends MethodPrimitive {
     public static final int MODIFIERS = Modifier.PUBLIC | Modifier.STATIC | ModifierSet.FINAL;
 
     protected MethodDeclaration declaration = null, invoker = null;
-    jmplib.reflect.TypeVariable<?>[] methodTypeParameters;
+    private jmplib.reflect.TypeVariable<?>[] methodTypeParameters;
     private String name, body;
     private String[] paramNames;
     private java.lang.reflect.Type[] genericParamTypes;

@@ -158,6 +158,9 @@ public class AddFieldPrimitive extends FieldPrimitive {
                 new VariableDeclaratorId(name));
         declaration = new FieldDeclaration(modifiers, type, vd);
         if (init != null) {
+            init = init.trim();
+            if (init.startsWith("="))
+                init = init.substring(1, init.length());
             vd.setInit(JavaParser.parseExpression(init));
         }
         if (Modifier.isStatic(modifiers)) {
@@ -232,13 +235,13 @@ public class AddFieldPrimitive extends FieldPrimitive {
         String bodyGetter;
         String bodySetter;
         if (JMPlibConfig.getInstance().getConfigureAsThreadSafe()) {
-            Object[] args = {name, clazz.getSimpleName()
-                    + "_NewVersion_"
-                    + (classContent.isUpdated() ? classContent.getVersion() - 1
-                    : classContent.getVersion()),
-                    clazz.getSimpleName(),
-                    type,
-                    clazz.getSimpleName() + "_NewVersion_0"};
+            Object[] args = {name, //%1
+                    clazz.getSimpleName() + "_NewVersion_" + (classContent.isUpdated() ?
+                            classContent.getVersion() - 1
+                            : classContent.getVersion()), //%2
+                    clazz.getSimpleName(), //%3
+                    type, //%4
+                    clazz.getSimpleName() + "_NewVersion_0"}; //%5
             bodyGetter = String.format(
                     Templates.THREAD_SAFE_FIELD_GETTER_TEMPLATE, args);
             bodySetter = String.format(

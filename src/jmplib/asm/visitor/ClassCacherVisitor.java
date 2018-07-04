@@ -134,10 +134,11 @@ public class ClassCacherVisitor extends ClassVisitor {
         String bodyGetter;
         String bodySetter;
         if (JMPlibConfig.getInstance().getConfigureAsThreadSafe()) {
-            Object[] args = {name, clazz.getSimpleName() + "_NewVersion_0",
-                    clazz.getSimpleName(),
-                    fieldType.getClassName(),
-                    clazz.getSimpleName() + "_NewVersion_0"};
+            Object[] args = {name, //%1
+                    clazz.getSimpleName() + "_NewVersion_0", //%2
+                    clazz.getSimpleName(), //%3
+                    fieldType.getClassName(), //%4
+                    clazz.getSimpleName() + "_NewVersion_0"}; //%5
             bodyGetter = String.format(
                     Templates.THREAD_SAFE_FIELD_GETTER_TEMPLATE, args);
                     //Templates.FIELD_GETTER_TEMPLATE, args);
