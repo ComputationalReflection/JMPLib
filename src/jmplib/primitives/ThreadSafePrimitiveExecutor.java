@@ -10,6 +10,8 @@ import java.util.concurrent.ConcurrentLinkedDeque;
  */
 public class ThreadSafePrimitiveExecutor extends PrimitiveExecutor {
 
+    //public static final ReadWriteLock threadSafeMonitor = new ReentrantReadWriteLock();
+
     public ThreadSafePrimitiveExecutor(Primitive primitive) {
         super(primitive);
         executedPrimitives = new ConcurrentLinkedDeque<>();
@@ -24,25 +26,23 @@ public class ThreadSafePrimitiveExecutor extends PrimitiveExecutor {
     void runAllPrimitives() throws StructuralIntercessionException {
         //Let no primitive executor run in parallel with others to avoid conflicting changes.
         synchronized (ThreadSafePrimitiveExecutor.class) {
-            //Class cl = null;
             super.runAllPrimitives();
-            // Execute each primitive
-         /*   while (!primitives.isEmpty()) {
-                Primitive primitive = primitives.poll();
-                cl = primitive.getTargetClass();
-                synchronized (cl) {
-                    // Store the affected ClassContents
-                    classContents.addAll(primitive.execute());
-                    // Store the primitive in the stack of executed
-                    executedPrimitives.push(primitive);
-                    safeChange &= primitive.isSafe();
-                    // setClassContentsUpdated();
-                }
-            }
-            synchronized (cl) {
-                makeChangesEffective();
-            }*/
         }
-
+        /*
+        try {
+            try {
+                ThreadSafePrimitiveExecutor.threadSafeMonitor.readLock().unlock();
+            }
+            catch (Exception ex) {}
+            ThreadSafePrimitiveExecutor.threadSafeMonitor.writeLock().lock();
+            super.runAllPrimitives();
+            ThreadSafePrimitiveExecutor.threadSafeMonitor.readLock().lock();
+            ThreadSafePrimitiveExecutor.threadSafeMonitor.writeLock().unlock();
+        }
+        catch (StructuralIntercessionException ex) {
+            ThreadSafePrimitiveExecutor.threadSafeMonitor.readLock().lock();
+            ThreadSafePrimitiveExecutor.threadSafeMonitor.writeLock().unlock();
+            throw ex;
+        }*/
     }
 }

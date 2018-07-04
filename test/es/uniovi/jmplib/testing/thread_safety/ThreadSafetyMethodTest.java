@@ -645,6 +645,7 @@ public class ThreadSafetyMethodTest {
                     interc1.addMethod(cl, new jmplib.reflect.Method("foo" + i, MethodType.methodType(int.class),
                             "return 10;", Modifier.PUBLIC));
                     i++;
+                    //System.out.println("A" + i);
                 }
                 running5.set(true);
 
@@ -662,6 +663,7 @@ public class ThreadSafetyMethodTest {
                             new MemberInvokerData<>(Function.class, ContainerClass11.class, int.class));
                     assertEquals(10, (int) newSize.apply(obj));
                     i++;
+                   // System.out.println("B" + i);
                 }
                 while (!running5.get())
                     Thread.sleep(100);

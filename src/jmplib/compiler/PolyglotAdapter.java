@@ -71,13 +71,27 @@ public class PolyglotAdapter {
 
         SilentErrorQueue errorQueue = new SilentErrorQueue(100, "errors");
         JavaSourceFromString[] sources;
-        try {
-            //System.out.println(ClassPathUtil.getApplicationClassPath());
-            //sources = new polyglot.main.Main().start(args, errorQueue).toArray(new JavaSourceFromString[0]);
-            sources = polyglothCompilerInstance.start(args, errorQueue).toArray(new JavaSourceFromString[0]);
-        } catch (TerminationException e) {
-            String error = getError(errorQueue);
-            throw new CompilationFailedException("The compilation of the classes failed.\n" + error, error);
+        if (JMPlibConfig.getInstance().getConfigureAsThreadSafe()) {
+            synchronized (polyglothCompilerInstance) {
+                try {
+                    //System.out.println(ClassPathUtil.getApplicationClassPath());
+                    //sources = new polyglot.main.Main().start(args, errorQueue).toArray(new JavaSourceFromString[0]);
+                    sources = polyglothCompilerInstance.start(args, errorQueue).toArray(new JavaSourceFromString[0]);
+                } catch (TerminationException e) {
+                    String error = getError(errorQueue);
+                    throw new CompilationFailedException("The compilation of the classes failed.\n" + error, error);
+                }
+            }
+        }
+        else {
+            try {
+                //System.out.println(ClassPathUtil.getApplicationClassPath());
+                //sources = new polyglot.main.Main().start(args, errorQueue).toArray(new JavaSourceFromString[0]);
+                sources = polyglothCompilerInstance.start(args, errorQueue).toArray(new JavaSourceFromString[0]);
+            } catch (TerminationException e) {
+                String error = getError(errorQueue);
+                throw new CompilationFailedException("The compilation of the classes failed.\n" + error, error);
+            }
         }
         for (int i = 0; i < sources.length; i++) {
             String name = files[i].getName().replaceAll("\\.java", "");

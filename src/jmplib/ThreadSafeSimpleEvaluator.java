@@ -31,6 +31,11 @@ public class ThreadSafeSimpleEvaluator extends SimpleEvaluator implements IEvalu
         synchronized (ThreadSafePrimitiveExecutor.class) {
             return super.getMethodInvoker(type, name, info);
         }
+        /*
+        jmplib.primitives.ThreadSafePrimitiveExecutor.threadSafeMonitor.readLock().lock();
+        T ret = super.getMethodInvoker(type, name, info);
+        jmplib.primitives.ThreadSafePrimitiveExecutor.threadSafeMonitor.readLock().unlock();
+        return ret;*/
     }
 
     /**
@@ -41,6 +46,10 @@ public class ThreadSafeSimpleEvaluator extends SimpleEvaluator implements IEvalu
         synchronized (ThreadSafePrimitiveExecutor.class) {
             return super.getFieldInvoker(type, name, info);
         }
+/*        jmplib.primitives.ThreadSafePrimitiveExecutor.threadSafeMonitor.readLock().lock();
+        T ret = super.getFieldInvoker(type, name, info);
+        jmplib.primitives.ThreadSafePrimitiveExecutor.threadSafeMonitor.readLock().unlock();
+        return ret;*/
     }
 
     /**
@@ -48,30 +57,13 @@ public class ThreadSafeSimpleEvaluator extends SimpleEvaluator implements IEvalu
      */
     @Override
     public <T> T setFieldInvoker(Type type, String name, MemberInvokerData<T> info) throws StructuralIntercessionException {
-        synchronized (ThreadSafePrimitiveExecutor.class) {
-            return super.setFieldInvoker(type, name, info);
+         synchronized (ThreadSafePrimitiveExecutor.class) {
+             return super.setFieldInvoker(type, name, info);
         }
+        /*
+        jmplib.primitives.ThreadSafePrimitiveExecutor.threadSafeMonitor.readLock().lock();
+        T ret = super.setFieldInvoker(type, name, info);
+        jmplib.primitives.ThreadSafePrimitiveExecutor.threadSafeMonitor.readLock().unlock();
+        return ret;*/
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Class<?> exec(String classSource) throws StructuralIntercessionException {
-        synchronized (ThreadSafeSimpleEvaluator.class) {
-            return super.exec(classSource);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T> T generateEvalInvoker(String code, EvalInvokerData<T> invokerData)
-            throws StructuralIntercessionException {
-        synchronized (ThreadSafeSimpleEvaluator.class) {
-            return super.generateEvalInvoker(code, invokerData);
-        }
-    }
-
 }
