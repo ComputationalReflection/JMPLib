@@ -1,5 +1,9 @@
 package es.uniovi.jmplib.testing.times.sor;
 
+import es.uniovi.jmplib.testing.times.BenchMark;
+import es.uniovi.jmplib.testing.times.Chronometer;
+import es.uniovi.jmplib.testing.times.Random;
+import es.uniovi.jmplib.testing.times.Test;
 import jmplib.IIntercessor;
 import jmplib.TransactionalIntercessor;
 import jmplib.exceptions.StructuralIntercessionException;
@@ -8,12 +12,17 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Modifier;
 
 public class SORBenchMark extends BenchMark {
+    public SORBenchMark(Test test) {
+        super(test);
+    }
+
+    Random r = new Random();
 
     @Override
     public int runOneIteration() {
         double[][] matrix = randomMatrix(DIN, DIN);
         Chronometer chronometer = new Chronometer();
-        Test test = new SORTest(matrix);
+        Test test = new SOR(matrix);
         chronometer.start();
         test.test();
         chronometer.stop();
@@ -33,7 +42,7 @@ public class SORBenchMark extends BenchMark {
     public void prepare() {
         IIntercessor transaction = new TransactionalIntercessor().createIntercessor();
         try {
-            transaction.addMethod(SORTest.class, new jmplib.reflect.Method("num_flops", MethodType
+            transaction.addMethod(SOR.class, new jmplib.reflect.Method("num_flops", MethodType
                     .methodType(double.class, int.class, int.class, int.class),
                     "double Md = (double) M;" + "double Nd = (double) N;"
                             + "double num_iterD = (double) num_iterations;"
@@ -42,7 +51,7 @@ public class SORBenchMark extends BenchMark {
                     new String[]{"N", "M", "num_iterations"}));
             transaction
                     .addMethod(
-                            SORTest.class,
+                            SOR.class,
                             new jmplib.reflect.Method("execute",
                                     MethodType.methodType(void.class, double.class,
                                             double[][].class, int.class),
@@ -63,7 +72,7 @@ public class SORBenchMark extends BenchMark {
                                             + "}" + "}" + "}",
                                     Modifier.PUBLIC
                                             | Modifier.STATIC | Modifier.FINAL, new String[]{"omega", "G", "num_iterations"}));
-            transaction.replaceImplementation(SORTest.class, new jmplib.reflect.Method("test",
+            transaction.replaceImplementation(SOR.class, new jmplib.reflect.Method("test",
                     "execute(1.25, matrix, BenchMark.ITERATIONS);"));
             transaction.commit();
         } catch (StructuralIntercessionException e) {

@@ -1,5 +1,8 @@
 package es.uniovi.jmplib.testing.times.fft;
 
+import es.uniovi.jmplib.testing.times.BenchMark;
+import es.uniovi.jmplib.testing.times.Chronometer;
+import es.uniovi.jmplib.testing.times.Test;
 import jmplib.IIntercessor;
 import jmplib.TransactionalIntercessor;
 import jmplib.exceptions.StructuralIntercessionException;
@@ -9,10 +12,14 @@ import java.lang.reflect.Modifier;
 
 public class FFTBenchMark extends BenchMark {
 
+    public FFTBenchMark(Test test) {
+        super(test);
+    }
+
     @Override
     public int runOneIteration() {
         Chronometer chronometer = new Chronometer();
-        FFTTest test = new FFTTest();
+        FFT test = new FFT();
         chronometer.start();
         test.test();
         chronometer.stop();
@@ -24,11 +31,11 @@ public class FFTBenchMark extends BenchMark {
     public void prepare() {
         IIntercessor transaction = new TransactionalIntercessor().createIntercessor();
         try {
-            transaction.addMethod(FFTTest.class, new jmplib.reflect.Method("transform",
+            transaction.addMethod(FFT.class, new jmplib.reflect.Method("transform",
                     MethodType.methodType(void.class, double[].class),
                     "transform_internal(data, -1);", Modifier.PUBLIC | Modifier.STATIC,
                     new String[]{"data"}));
-            transaction.addMethod(FFTTest.class, new jmplib.reflect.Method("log2",
+            transaction.addMethod(FFT.class, new jmplib.reflect.Method("log2",
                     MethodType.methodType(int.class, int.class),
                     "int log = 0;"
                             + "for (int k = 1; k < n; k *= 2, log++)"
@@ -38,7 +45,7 @@ public class FFTBenchMark extends BenchMark {
                             + "return log;",
                     Modifier.PUBLIC | Modifier.STATIC,
                     new String[]{"n"}));
-            transaction.addMethod(FFTTest.class, new jmplib.reflect.Method("inverse",
+            transaction.addMethod(FFT.class, new jmplib.reflect.Method("inverse",
                     MethodType.methodType(void.class, double[].class),
                     "transform_internal(data, +1);"
                             + "int nd=data.length;"
@@ -48,7 +55,7 @@ public class FFTBenchMark extends BenchMark {
                             + "data[i] *= norm;",
                     Modifier.PUBLIC | Modifier.STATIC,
                     new String[]{"data"}));
-            transaction.addMethod(FFTTest.class, new jmplib.reflect.Method("transform_internal",
+            transaction.addMethod(FFT.class, new jmplib.reflect.Method("transform_internal",
                     MethodType.methodType(void.class, double[].class, int.class),
                     "if (data.length == 0)"
                             + "return;"
@@ -95,7 +102,7 @@ public class FFTBenchMark extends BenchMark {
                             + "}",
                     Modifier.PROTECTED | Modifier.STATIC,
                     new String[]{"data", "direction"}));
-            transaction.addMethod(FFTTest.class, new jmplib.reflect.Method("bitreverse",
+            transaction.addMethod(FFT.class, new jmplib.reflect.Method("bitreverse",
                     MethodType.methodType(void.class, double[].class),
                     "int n = data.length / 2;"
                             + "int nm1 = n - 1;"
@@ -121,7 +128,7 @@ public class FFTBenchMark extends BenchMark {
                             + "}",
                     Modifier.PROTECTED | Modifier.STATIC,
                     new String[]{"data"}));
-            transaction.addMethod(FFTTest.class, new jmplib.reflect.Method("randomVector",
+            transaction.addMethod(FFT.class, new jmplib.reflect.Method("randomVector",
                     MethodType.methodType(double[].class, int.class),
                     "Random r = new Random();"
                             + "double A[] = new double[N];"
@@ -130,11 +137,11 @@ public class FFTBenchMark extends BenchMark {
                             + "return A;",
                     Modifier.PRIVATE | Modifier.STATIC,
                     new String[]{"N"}));
-            transaction.replaceImplementation(FFTTest.class, new jmplib.reflect.Method("test",
+            transaction.replaceImplementation(FFT.class, new jmplib.reflect.Method("test",
                     "double x[] = randomVector(2 * BenchMark.DIN);"
                             + "for (int i = 0; i < BenchMark.ITERATIONS; i++) {"
-                            + "FFTTest.transform(x);"
-                            + "FFTTest.inverse(x);"
+                            + "FFT.transform(x);"
+                            + "FFT.inverse(x);"
                             + "}"));
             transaction.commit();
         } catch (StructuralIntercessionException e) {

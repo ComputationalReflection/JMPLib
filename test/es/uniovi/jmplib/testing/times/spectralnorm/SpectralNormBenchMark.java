@@ -1,5 +1,7 @@
 package es.uniovi.jmplib.testing.times.spectralnorm;
 
+import es.uniovi.jmplib.testing.times.BenchMark;
+import es.uniovi.jmplib.testing.times.Test;
 import jmplib.IIntercessor;
 import jmplib.TransactionalIntercessor;
 import jmplib.exceptions.StructuralIntercessionException;
@@ -9,31 +11,19 @@ import java.lang.reflect.Modifier;
 
 public class SpectralNormBenchMark extends BenchMark {
 
-    private Test test = null;
-
     public SpectralNormBenchMark(Test test) {
-        super();
-        this.test = test;
+        super(test);
     }
 
-    @Override
-    public int runOneIteration() {
-        Chronometer chronometer = new Chronometer();
-        chronometer.start();
-        test.test();
-        chronometer.stop();
-        this.microSeconds = chronometer.GetMicroSeconds();
-        return this.microSeconds;
-    }
 
     @Override
     public void prepare() {
         IIntercessor transaction = new TransactionalIntercessor().createIntercessor();
         try {
-            // SpectralNormTest
-            transaction.replaceImplementation(SpectralNormTest.class, new jmplib.reflect.Method("test",
+            // SpectralNorm
+            transaction.replaceImplementation(SpectralNorm.class, new jmplib.reflect.Method("test",
                     "spectralnorm(BenchMark.ITERATIONS);"));
-            transaction.addMethod(SpectralNormTest.class, new jmplib.reflect.Method("spectralnorm",
+            transaction.addMethod(SpectralNorm.class, new jmplib.reflect.Method("spectralnorm",
                     MethodType.methodType(double.class, int.class),
                     "double[] u = new double[n];"
                             + "double[] v = new double[n];"
@@ -53,12 +43,12 @@ public class SpectralNormBenchMark extends BenchMark {
                             + "}"
                             + "return Math.sqrt(vBv/vv);",
                     Modifier.FINAL | Modifier.STATIC | Modifier.PRIVATE, "n"));
-            transaction.addMethod(SpectralNormTest.class, new jmplib.reflect.Method("A",
+            transaction.addMethod(SpectralNorm.class, new jmplib.reflect.Method("A",
                     MethodType.methodType(double.class, int.class, int.class),
                     "int div = ( ((i+j) * (i+j+1) >>> 1) +i+1 );"
                             + "return 1.0 / div;",
                     Modifier.FINAL | Modifier.STATIC | Modifier.PRIVATE, "i", "j"));
-            transaction.addMethod(SpectralNormTest.class, new jmplib.reflect.Method("Au",
+            transaction.addMethod(SpectralNorm.class, new jmplib.reflect.Method("Au",
                     MethodType.methodType(void.class, double[].class, double[].class),
                     "for (int i = 0; i < u.length; i++) {"
                             + "double sum = 0;"
@@ -66,7 +56,7 @@ public class SpectralNormBenchMark extends BenchMark {
                             + "v[i] = sum;"
                             + "}",
                     Modifier.FINAL | Modifier.STATIC | Modifier.PRIVATE, "u", "v"));
-            transaction.addMethod(SpectralNormTest.class, new jmplib.reflect.Method("Atu",
+            transaction.addMethod(SpectralNorm.class, new jmplib.reflect.Method("Atu",
                     MethodType.methodType(void.class, double[].class, double[].class),
                     "for (int i = 0; i < u.length; i++) {"
                             + "double sum = 0;"
@@ -74,7 +64,7 @@ public class SpectralNormBenchMark extends BenchMark {
                             + "v[i] = sum;"
                             + "}",
                     Modifier.FINAL | Modifier.STATIC | Modifier.PRIVATE, "u", "v"));
-            transaction.addMethod(SpectralNormTest.class, new jmplib.reflect.Method("AtAu",
+            transaction.addMethod(SpectralNorm.class, new jmplib.reflect.Method("AtAu",
                     MethodType.methodType(void.class, double[].class, double[].class, double[].class),
                     "Au(u,w);"
                             + "Atu(w,v);",

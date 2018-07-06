@@ -1,5 +1,8 @@
 package es.uniovi.jmplib.testing.times.fannkuchredux;
 
+import es.uniovi.jmplib.testing.times.BenchMark;
+import es.uniovi.jmplib.testing.times.Chronometer;
+import es.uniovi.jmplib.testing.times.Test;
 import jmplib.IIntercessor;
 import jmplib.TransactionalIntercessor;
 import jmplib.exceptions.StructuralIntercessionException;
@@ -8,22 +11,8 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Modifier;
 
 public class FannkuchreduxBenchMark extends BenchMark {
-
-    private Test test = null;
-
     public FannkuchreduxBenchMark(Test test) {
-        super();
-        this.test = test;
-    }
-
-    @Override
-    public int runOneIteration() {
-        Chronometer chronometer = new Chronometer();
-        chronometer.start();
-        test.test();
-        chronometer.stop();
-        this.microSeconds = chronometer.GetMicroSeconds();
-        return this.microSeconds;
+        super(test);
     }
 
     @Override

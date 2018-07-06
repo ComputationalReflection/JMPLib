@@ -1,5 +1,7 @@
 package es.uniovi.jmplib.testing.times.raytracer;
 
+import es.uniovi.jmplib.testing.times.BenchMark;
+import es.uniovi.jmplib.testing.times.Test;
 import jmplib.IIntercessor;
 import jmplib.TransactionalIntercessor;
 import jmplib.exceptions.StructuralIntercessionException;
@@ -11,10 +13,8 @@ import java.util.List;
 
 public class RayTracerBenchMark extends BenchMark {
 
-    @Override
-    public void runOneIteration() {
-        JGFRayTracerBench rt = new JGFRayTracerBench();
-        rt.test();
+    public RayTracerBenchMark(Test test) {
+        super(test);
     }
 
     @Override

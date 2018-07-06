@@ -1,5 +1,7 @@
 package es.uniovi.jmplib.testing.times.mandelbrot;
 
+import es.uniovi.jmplib.testing.times.BenchMark;
+import es.uniovi.jmplib.testing.times.Test;
 import jmplib.IIntercessor;
 import jmplib.TransactionalIntercessor;
 import jmplib.exceptions.StructuralIntercessionException;
@@ -10,37 +12,26 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class MandelbrotBenchMark extends BenchMark {
 
-    private Test test = null;
+
 
     public MandelbrotBenchMark(Test test) {
-        super();
-        this.test = test;
-    }
-
-    @Override
-    public int runOneIteration() {
-        Chronometer chronometer = new Chronometer();
-        chronometer.start();
-        test.test();
-        chronometer.stop();
-        this.microSeconds = chronometer.GetMicroSeconds();
-        return this.microSeconds;
+        super(test);
     }
 
     @Override
     public void prepare() {
         IIntercessor transaction = new TransactionalIntercessor().createIntercessor();
         try {
-            transaction.addField(MandelbrotTest.class, new jmplib.reflect.Field(Modifier.STATIC,
+            transaction.addField(Mandelbrot.class, new jmplib.reflect.Field(Modifier.STATIC,
                     byte[][].class, "out"));
-            transaction.addField(MandelbrotTest.class, new jmplib.reflect.Field(Modifier.STATIC,
+            transaction.addField(Mandelbrot.class, new jmplib.reflect.Field(Modifier.STATIC,
                     double[].class, "Crb"));
-            transaction.addField(MandelbrotTest.class, new jmplib.reflect.Field(Modifier.STATIC,
+            transaction.addField(Mandelbrot.class, new jmplib.reflect.Field(Modifier.STATIC,
                     double[].class, "Cib"));
-            transaction.addField(MandelbrotTest.class, new jmplib.reflect.Field(Modifier.STATIC,
+            transaction.addField(Mandelbrot.class, new jmplib.reflect.Field(Modifier.STATIC,
                     AtomicInteger.class, "yCt"));
 
-            transaction.addMethod(MandelbrotTest.class, new jmplib.reflect.Method("getByte",
+            transaction.addMethod(Mandelbrot.class, new jmplib.reflect.Method("getByte",
                     MethodType.methodType(int.class, int.class, int.class),
                     "int res=0;"
                             + "for(int i=0;i<8;i+=2){"
@@ -66,14 +57,14 @@ public class MandelbrotBenchMark extends BenchMark {
                     Modifier.STATIC,
                     "x", "y"));
 
-            transaction.addMethod(MandelbrotTest.class, new jmplib.reflect.Method("putLine",
+            transaction.addMethod(Mandelbrot.class, new jmplib.reflect.Method("putLine",
                     MethodType.methodType(void.class, int.class, byte[].class),
                     "for (int xb=0; xb<line.length; xb++) "
                             + "line[xb]=(byte)getByte(xb*8,y);",
                     Modifier.STATIC,
                     "y", "line"));
 
-            transaction.replaceImplementation(MandelbrotTest.class, new jmplib.reflect.Method("test",
+            transaction.replaceImplementation(Mandelbrot.class, new jmplib.reflect.Method("test",
                     "int N = BenchMark.ITERATIONS;"
                             + "Crb=new double[N+7]; Cib=new double[N+7];"
                             + "double invN=2.0/N; for(int i=0;i<N;i++){ Cib[i]=i*invN-1.0; Crb[i]=i*invN-1.5; }"

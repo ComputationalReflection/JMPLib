@@ -32,7 +32,7 @@ import polyglot.util.SilentErrorQueue;
 public class PolyglotAdapter {
     private static boolean DEBUG = true;
     private final static List<File> classPath = ClassPathUtil.getApplicationClassPath();
-    private final static String[] fixedPolyglothArgs = {"-c", "-extclass", "polyglot.ext.jl7.JL7ExtensionInfo",
+    private final static String[] fixedPolyglothArgs = {"-c", "-w", "200", "-extclass", "polyglot.ext.jl7.JL7ExtensionInfo",
             "-simpleoutput", "-classpath"};//, "-assert" };
 
     // Single polygloth compiler instance running all the time: Unfeasible as this instance do not seem to support reentries.
@@ -98,8 +98,7 @@ public class PolyglotAdapter {
             sources[i] = new JavaSourceFromString(name, sources[i].getCode(), files[i].getAbsolutePath().hashCode());
             if (DEBUG) {
                 try {
-                    PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(files[i])));
-                    //FileWriter writer = new FileWriter(files[i]);
+                    BufferedWriter writer = new BufferedWriter(new FileWriter(files[i]));
                     writer.write(sources[i].getCode());
                     writer.close();
                 } catch (IOException e) {

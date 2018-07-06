@@ -1,5 +1,7 @@
 package es.uniovi.jmplib.testing.times.nbody;
 
+import es.uniovi.jmplib.testing.times.BenchMark;
+import es.uniovi.jmplib.testing.times.Test;
 import jmplib.IIntercessor;
 import jmplib.TransactionalIntercessor;
 import jmplib.exceptions.StructuralIntercessionException;
@@ -9,29 +11,17 @@ import java.lang.reflect.Modifier;
 
 public class NBodyBenchMark extends BenchMark {
 
-    private Test test = null;
-
     public NBodyBenchMark(Test test) {
-        super();
-        this.test = test;
+        super(test);
     }
 
-    @Override
-    public int runOneIteration() {
-        Chronometer chronometer = new Chronometer();
-        chronometer.start();
-        test.test();
-        chronometer.stop();
-        this.microSeconds = chronometer.GetMicroSeconds();
-        return this.microSeconds;
-    }
 
     @Override
     public void prepare() {
         IIntercessor transaction = new TransactionalIntercessor().createIntercessor();
         try {
-            // NBodyTest
-            transaction.replaceImplementation(NBodyTest.class, new jmplib.reflect.Method("test",
+            // NBody
+            transaction.replaceImplementation(NBody.class, new jmplib.reflect.Method("test",
                     "NBodySystem bodies = new NBodySystem();"
                             + "bodies.initialize();"
                             + "for (int i = 0; i < BenchMark.ITERATIONS; ++i)"

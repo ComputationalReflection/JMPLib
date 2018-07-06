@@ -1,5 +1,7 @@
 package es.uniovi.jmplib.testing.times.montecarlo;
 
+import es.uniovi.jmplib.testing.times.BenchMark;
+import es.uniovi.jmplib.testing.times.Test;
 import jmplib.IIntercessor;
 import jmplib.TransactionalIntercessor;
 import jmplib.exceptions.StructuralIntercessionException;
@@ -8,26 +10,20 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Modifier;
 
 public class MonteCarloBenchMark extends BenchMark {
-
-    @Override
-    public int runOneIteration() {
-        Chronometer chronometer = new Chronometer();
-        Test test = new MonteCarloTest();
-        chronometer.start();
-        test.test();
-        chronometer.stop();
-        return chronometer.GetMicroSeconds();
+    public MonteCarloBenchMark(Test test) {
+        super(test);
     }
+
 
     @Override
     public void prepare() {
         IIntercessor transaction = new TransactionalIntercessor().createIntercessor();
         try {
-            transaction.addField(MonteCarloTest.class, new jmplib.reflect.Field(Modifier.STATIC
+            transaction.addField(MonteCarlo.class, new jmplib.reflect.Field(Modifier.STATIC
                     | Modifier.FINAL, int.class, "SEED", "113"));
             transaction
                     .addMethod(
-                            MonteCarloTest.class,
+                            MonteCarlo.class,
                             new jmplib.reflect.Method("integrate",
                                     MethodType.methodType(double.class, int.class),
                                     "Random R = new Random(SEED);"
@@ -41,7 +37,7 @@ public class MonteCarloBenchMark extends BenchMark {
                                             + "return ((double) under_curve / Num_samples) * 4.0;",
                                     Modifier.FINAL | Modifier.STATIC | Modifier.PUBLIC,
                                     new String[]{"Num_samples"}));
-            transaction.replaceImplementation(MonteCarloTest.class, new jmplib.reflect.Method("test",
+            transaction.replaceImplementation(MonteCarlo.class, new jmplib.reflect.Method("test",
                     "integrate(BenchMark.ITERATIONS);"));
             transaction.commit();
         } catch (StructuralIntercessionException e) {

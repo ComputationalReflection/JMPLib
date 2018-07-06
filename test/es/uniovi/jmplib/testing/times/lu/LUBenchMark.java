@@ -1,5 +1,9 @@
 package es.uniovi.jmplib.testing.times.lu;
 
+import es.uniovi.jmplib.testing.times.BenchMark;
+import es.uniovi.jmplib.testing.times.Chronometer;
+import es.uniovi.jmplib.testing.times.Random;
+import es.uniovi.jmplib.testing.times.Test;
 import jmplib.IIntercessor;
 import jmplib.TransactionalIntercessor;
 import jmplib.exceptions.StructuralIntercessionException;
@@ -8,15 +12,19 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Modifier;
 
 public class LUBenchMark extends BenchMark {
+    Random r = new Random();
+
+    public LUBenchMark(Test test) {
+        super(test);
+    }
 
     @Override
     public int runOneIteration() {
-
         double A[][] = randomMatrix(DIN, DIN);
         double lu[][] = new double[DIN][DIN];
         int pivot[] = new int[DIN];
 
-        LUTest test = new LUTest(A, lu, pivot);
+        test = new LU(A, lu, pivot);
         Chronometer chronometer = new Chronometer();
         chronometer.start();
         for (int i = 0; i < ITERATIONS; i++) {
@@ -39,7 +47,7 @@ public class LUBenchMark extends BenchMark {
     public void prepare() {
         IIntercessor transaction = new TransactionalIntercessor().createIntercessor();
         try {
-            transaction.addMethod(LUTest.class, new jmplib.reflect.Method("CopyMatrix",
+            transaction.addMethod(LU.class, new jmplib.reflect.Method("CopyMatrix",
                     MethodType.methodType(void.class, double[][].class,
                             double[][].class), "int M = A.length;" + "int N = A[0].length;"
                     + "int remainder = N & 3;"
@@ -53,7 +61,7 @@ public class LUBenchMark extends BenchMark {
                     + "Bi[j + 3] = Ai[j + 3];" + "}" + "}",
                     Modifier.PUBLIC | Modifier.STATIC,
                     new String[]{"B", "A"}));
-            transaction.addMethod(LUTest.class, new jmplib.reflect.Method("factor", MethodType
+            transaction.addMethod(LU.class, new jmplib.reflect.Method("factor", MethodType
                     .methodType(int.class, double[][].class, int[].class),
                     "int N = A.length;"
                             + "int M = A[0].length;"
@@ -76,7 +84,7 @@ public class LUBenchMark extends BenchMark {
                             + "for (int jj = j + 1; jj < N; jj++)"
                             + "Aii[jj] -= AiiJ * Aj[jj];" + "}" + "}" + "}"
                             + "return 0;", Modifier.PUBLIC | Modifier.STATIC, new String[]{"A", "pivot"}));
-            transaction.replaceImplementation(LUTest.class, new jmplib.reflect.Method("test",
+            transaction.replaceImplementation(LU.class, new jmplib.reflect.Method("test",
                     "CopyMatrix(lu, A);"
                             + "factor(lu, pivot);"));
             transaction.commit();

@@ -1,21 +1,17 @@
 package es.uniovi.jmplib.testing.times.raytracer;
 
+import es.uniovi.jmplib.testing.times.BenchMark;
 import org.junit.Test;
 
 public class RayTracerTest {
 
     @Test
     public void rayTracer() {
-        BenchMark mc = new RayTracerBenchMark();
-        BenchMark.ITERATIONS = 0;
+        BenchMark mc = new RayTracerBenchMark(new RayTracer());
+        mc.ITERATIONS = 0;
         mc.prepare();
-        //long start = System.nanoTime();
-        mc.RunStartup();
-        //long end = System.nanoTime();
-        //double total = (end - start) / 1000000000; // seconds
-        //if (total > 2) { // more than 2 seconds
-        //	fail("Too slow: " + total + "s");
-        //}
+        int time = mc.RunStartup();
+        System.out.println("RayTracer time: " + time / 1000000 + "ms");
     }
 
 }

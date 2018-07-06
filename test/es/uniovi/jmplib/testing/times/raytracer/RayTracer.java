@@ -1,5 +1,11 @@
 package es.uniovi.jmplib.testing.times.raytracer;
 
-public class RayTracer {
+import es.uniovi.jmplib.testing.times.Test;
 
+public class RayTracer extends Test {
+
+    @Override
+    public void test() {
+
+    }
 }

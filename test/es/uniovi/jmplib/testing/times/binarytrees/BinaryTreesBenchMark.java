@@ -1,5 +1,7 @@
 package es.uniovi.jmplib.testing.times.binarytrees;
 
+import es.uniovi.jmplib.testing.times.BenchMark;
+import es.uniovi.jmplib.testing.times.Test;
 import jmplib.IIntercessor;
 import jmplib.TransactionalIntercessor;
 import jmplib.exceptions.StructuralIntercessionException;
@@ -10,17 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BinaryTreesBenchMark extends BenchMark {
-
-    private Test test = null;
-
     public BinaryTreesBenchMark(Test test) {
-        super();
-        this.test = test;
-    }
-
-    @Override
-    public void runOneIteration() {
-        test.test();
+        super(test);
     }
 
     @Override

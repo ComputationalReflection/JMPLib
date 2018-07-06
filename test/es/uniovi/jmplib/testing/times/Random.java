@@ -1,4 +1,4 @@
-package es.uniovi.jmplib.testing.times.sor;
+package es.uniovi.jmplib.testing.times;
 
 /* Random.java based on Java Numerical Toolkit (JNT) Random.UniformSequence
 	class.  We do not use Java's own java.util.Random so that we can compare
