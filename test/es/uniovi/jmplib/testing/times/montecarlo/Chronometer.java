@@ -1,4 +1,4 @@
-package es.uniovi.jmplib.testing.times;
+package es.uniovi.jmplib.testing.times.montecarlo;
 
 import java.time.Duration;
 import java.time.Instant;

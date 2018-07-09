@@ -1,7 +1,5 @@
 package es.uniovi.jmplib.testing.times.lu;
 
-import es.uniovi.jmplib.testing.times.Test;
-
 /**
  * LU matrix factorization. (Based on TNT implementation.) Decomposes a matrix A
  * into a triangular lower triangular factor (L) and an upper triangular factor

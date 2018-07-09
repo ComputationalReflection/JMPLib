@@ -7,8 +7,6 @@ package es.uniovi.jmplib.testing.times.binarytrees;
  * modified by Daryl Griffith
  */
 
-import es.uniovi.jmplib.testing.times.Test;
-
 public class BinaryTrees extends Test {
 
     @Override

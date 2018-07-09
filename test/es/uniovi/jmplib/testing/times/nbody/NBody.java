@@ -9,8 +9,6 @@ package es.uniovi.jmplib.testing.times.nbody;
  * modified by Daryl Griffith
  */
 
-import es.uniovi.jmplib.testing.times.Test;
-
 public class NBody extends Test {
 
     @Override

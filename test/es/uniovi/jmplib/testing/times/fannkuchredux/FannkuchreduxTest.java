@@ -1,5 +1,4 @@
 package es.uniovi.jmplib.testing.times.fannkuchredux;
-import es.uniovi.jmplib.testing.times.BenchMark;
 import org.junit.Test;
 
 /* The Computer Language Benchmarks Game
@@ -14,9 +13,17 @@ public class FannkuchreduxTest {
 	@Test
 	public void testFannkuchRedux() {
 		BenchMark mc = new FannkuchreduxBenchMark(new Fannkuchredux());
-		mc.ITERATIONS = 10;
+		BenchMark.ITERATIONS = 11;
 		mc.prepare();
-		int time = mc.RunStartup();
-		System.out.println("BinaryTrees time: " + time / 1000000 + "ms");
+
+		int numIts = 5;
+		int time;
+
+		System.out.println("Fannkuch Redux time; ");
+		for (int i = 0;i<numIts;i++) {
+			time = mc.RunStartup();
+			System.out.print(time / 1000000.0 + ";");
+		}
+		System.out.println("");
 	}
 }

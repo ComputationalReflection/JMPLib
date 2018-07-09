@@ -9,8 +9,6 @@ package es.uniovi.jmplib.testing.times.spectralnorm;
  * modified by Daryl Griffith
  */
 
-import es.uniovi.jmplib.testing.times.Test;
-
 public class SpectralNorm extends Test {
 
 	@Override

@@ -1,4 +1,4 @@
-package es.uniovi.jmplib.testing.times;
+package es.uniovi.jmplib.testing.times.raytracer;
 
 public abstract class Test {
 

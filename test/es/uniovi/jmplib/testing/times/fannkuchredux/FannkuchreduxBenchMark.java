@@ -1,8 +1,5 @@
 package es.uniovi.jmplib.testing.times.fannkuchredux;
 
-import es.uniovi.jmplib.testing.times.BenchMark;
-import es.uniovi.jmplib.testing.times.Chronometer;
-import es.uniovi.jmplib.testing.times.Test;
 import jmplib.IIntercessor;
 import jmplib.TransactionalIntercessor;
 import jmplib.exceptions.StructuralIntercessionException;
@@ -20,7 +17,7 @@ public class FannkuchreduxBenchMark extends BenchMark {
         IIntercessor transaction = new TransactionalIntercessor().createIntercessor();
         try {
             transaction
-                    .addMethod(FannkuchreduxTest.class, new jmplib.reflect.Method("fannkuch",
+                    .addMethod(Fannkuchredux.class, new jmplib.reflect.Method("fannkuch",
                             MethodType.methodType(int.class, int.class),
                             "int[] perm = new int[n];"
                                     + "int[] perm1 = new int[n];"
@@ -64,7 +61,7 @@ public class FannkuchreduxBenchMark extends BenchMark {
                                     + "}",
                             Modifier.STATIC | Modifier.PUBLIC,
                             new String[]{"n"}));
-            transaction.replaceImplementation(FannkuchreduxTest.class, new jmplib.reflect.Method("test",
+            transaction.replaceImplementation(Fannkuchredux.class, new jmplib.reflect.Method("test",
                     "fannkuch(BenchMark.ITERATIONS);"));
 
             transaction.commit();

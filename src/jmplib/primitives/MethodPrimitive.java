@@ -81,6 +81,12 @@ public abstract class MethodPrimitive extends AbstractPrimitive {
         return descriptor;
     }
 
+    private String getProperReturnClassName() {
+        //For arrays
+        if ((this.returnClass.toString().startsWith("[")) || (this.returnClass.toString().startsWith("class [")))
+            return this.returnClass.getSimpleName();
+        return returnClass.toString();
+    }
     /**
      * Generates the body of an invoker method
      *
@@ -93,9 +99,9 @@ public abstract class MethodPrimitive extends AbstractPrimitive {
             Object[] args = {clazz.getSimpleName(), name,
                     clazz.getSimpleName() + "_NewVersion_"
                             + (classContent.isUpdated() ? classContent.getVersion() - 1 : classContent.getVersion()),
-                    paramsNames, (returnClass.getName().equals("void") ? "" : returnClass.getName() + " ret_value = "),
+                    paramsNames, (returnClass.getName().equals("void") ? "" : getProperReturnClassName() + " ret_value = "),
                     (returnClass.getName().equals("void") ? "" : " return ret_value;"),
-                    (returnClass.getName().equals("void") ? "" : "(" + returnClass.getName()+")"),
+                    (returnClass.getName().equals("void") ? "" : "(" + getProperReturnClassName()+")"),
                     (paramsNames.equals("") ? "" : ", " + paramsNames), //%8
                     (paramTypes.equals("") ? "" : ", " + paramTypes)}; //%9
 

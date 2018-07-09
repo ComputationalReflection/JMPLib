@@ -1,9 +1,9 @@
-package es.uniovi.jmplib.testing.times;
+package es.uniovi.jmplib.testing.times.nbody;
 
 
 public abstract class BenchMark {
-    public int DIN = 50; // original value
-    public int ITERATIONS = 1000;
+    public static int DIN = 50; // original value
+    public static int ITERATIONS = 1000;
     protected int microSeconds;
 
     protected Test test;

@@ -1,7 +1,5 @@
 package es.uniovi.jmplib.testing.times.montecarlo;
 
-import es.uniovi.jmplib.testing.times.Test;
-
 /**
  * Estimate Pi by approximating the area of a circle.
  * <p>

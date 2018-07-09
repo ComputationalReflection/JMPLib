@@ -8,8 +8,6 @@ package es.uniovi.jmplib.testing.times.fannkuchredux;
  * modified by Daryl Griffith
  */
 
-import es.uniovi.jmplib.testing.times.Test;
-
 public class Fannkuchredux extends Test {
 
     @Override

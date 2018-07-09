@@ -95,11 +95,14 @@ public class AddMethodPrimitive extends MethodPrimitive {
         StringBuilder sbParamsNames = new StringBuilder();
         StringBuilder sbParamsTypes = new StringBuilder();
         for (int i = 0; i < parameterClasses.length; i++) {
-            parameter.add(new Parameter(JavaParserUtils.transform(parameterClasses[i]),
-                    new VariableDeclaratorId("param" + i)));
+            Parameter ptemp = new Parameter(JavaParserUtils.transform(parameterClasses[i]),
+                    new VariableDeclaratorId("param" + i));
+            parameter.add(ptemp);
             sbParamsNames.append("param" + i + ", ");
-            sbParamsTypes.append(parameterClasses[i].getName() + ".class");
+            //sbParamsTypes.append(parameterClasses[i].getName() + ".class, ");
+            sbParamsTypes.append(ptemp.getType().toString() + ".class, ");
         }
+
         String paramsNames = sbParamsNames.toString();
         if (!paramsNames.isEmpty())
             paramsNames = paramsNames.substring(0, paramsNames.length() - 2);

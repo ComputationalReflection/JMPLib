@@ -7,8 +7,6 @@ package es.uniovi.jmplib.testing.times.mandelbrot;
  */
 
 
-import es.uniovi.jmplib.testing.times.Test;
-
 public class Mandelbrot extends Test {
 
 
