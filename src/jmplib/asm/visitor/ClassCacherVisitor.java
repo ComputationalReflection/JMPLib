@@ -1,35 +1,29 @@
 package jmplib.asm.visitor;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import jmplib.annotations.AuxiliaryMethod;
-import jmplib.annotations.ExcludeFromJMPLib;
-import jmplib.annotations.NoRedirect;
-import jmplib.asm.util.ASMUtils;
-import jmplib.util.Templates;
-
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.FieldVisitor;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Type;
-
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseException;
-import com.github.javaparser.ast.body.BodyDeclaration;
-import com.github.javaparser.ast.body.ConstructorDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.body.Parameter;
-import com.github.javaparser.ast.body.VariableDeclaratorId;
+import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import jmplib.annotations.AuxiliaryMethod;
+import jmplib.annotations.ExcludeFromJMPLib;
+import jmplib.annotations.NoRedirect;
+import jmplib.asm.util.ASMUtils;
+import jmplib.config.JMPlibConfig;
+import jmplib.util.Templates;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Type;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This visitor analyses the class and build a list of new auxiliary fields
@@ -136,14 +130,28 @@ public class ClassCacherVisitor extends ClassVisitor {
         getter.setAnnotations(annotations);
         setter.setAnnotations(annotations);
 
-        Object[] args = {name, clazz.getSimpleName() + "_NewVersion_0",
-                clazz.getSimpleName()};
 
-        String bodyGetter = String.format(
-                Templates.FIELD_GETTER_TEMPLATE, args);
-        String bodySetter = String.format(
-                Templates.FIELD_SETTER_TEMPLATE, args);
-
+        String bodyGetter;
+        String bodySetter;
+        if (JMPlibConfig.getInstance().getConfigureAsThreadSafe()) {
+            Object[] args = {name, //%1
+                    clazz.getSimpleName() + "_NewVersion_0", //%2
+                    clazz.getSimpleName(), //%3
+                    fieldType.getClassName(), //%4
+                    clazz.getSimpleName() + "_NewVersion_0"}; //%5
+            bodyGetter = String.format(
+                    Templates.THREAD_SAFE_FIELD_GETTER_TEMPLATE, args);
+                    //Templates.FIELD_GETTER_TEMPLATE, args);
+            bodySetter = String.format(
+                    Templates.THREAD_SAFE_FIELD_SETTER_TEMPLATE, args);
+        } else {
+            Object[] args = {name, clazz.getSimpleName() + "_NewVersion_0",
+                    clazz.getSimpleName()};
+            bodyGetter = String.format(
+                    Templates.FIELD_GETTER_TEMPLATE, args);
+            bodySetter = String.format(
+                    Templates.FIELD_SETTER_TEMPLATE, args);
+        }
         try {
             getter.setBody(JavaParser.parseBlock(bodyGetter));
             setter.setBody(JavaParser.parseBlock(bodySetter));
@@ -210,14 +218,21 @@ public class ClassCacherVisitor extends ClassVisitor {
         parameter.add(new Parameter(new ClassOrInterfaceType(clazz.getName()),
                 new VariableDeclaratorId("o")));
         Type[] types = Type.getArgumentTypes(desc);
-        String paramsNames = "";
+        StringBuilder sbParamsNames = new StringBuilder();
+        StringBuilder sbParamsTypes = new StringBuilder();
         for (int i = 0; i < types.length; i++) {
             parameter.add(new Parameter(new ClassOrInterfaceType(types[i]
                     .getClassName()), new VariableDeclaratorId("param" + i)));
-            paramsNames += "param" + i + ", ";
+            sbParamsNames.append("param" + i + ", ");
+            sbParamsTypes.append(types[i].getClassName() + ".class, ");
         }
+        String paramsNames = sbParamsNames.toString();
+        String paramTypes = sbParamsTypes.toString();
         if (!paramsNames.isEmpty())
             paramsNames = paramsNames.substring(0, paramsNames.length() - 2);
+        if (paramTypes.endsWith(", "))
+            paramTypes = paramTypes.substring(0, paramTypes.length() - 2);
+
         List<AnnotationExpr> annotations = new ArrayList<>();
         annotations.add(new NormalAnnotationExpr(new NameExpr(
                 AuxiliaryMethod.class.getName()),
@@ -233,13 +248,27 @@ public class ClassCacherVisitor extends ClassVisitor {
             invoker.setThrows(list);
         }
 
-        Object[] args = {clazz.getSimpleName(), name,
-                clazz.getSimpleName() + "_NewVersion_0", paramsNames,
-                (returnClassName.equals("void") ? "" : "return ")};
 
-        String bodyInvoker = String.format(
-                Templates.INVOKER_BODY_TEMPLATE, args);
-
+        String bodyInvoker;
+        if (JMPlibConfig.getInstance().getConfigureAsThreadSafe()) {
+            Object[] args = {clazz.getSimpleName(), //%1
+                    name, //%2
+                    clazz.getSimpleName() + "_NewVersion_0", //%3
+                    paramsNames, //%4
+                    (returnClassName.equals("void") ? "" : returnClassName + " ret_value = "), //%5
+                    (returnClassName.equals("void") ? "return;" : " return ret_value;"), //%6
+                    (returnClassName.equals("void") ? "" : "(" + returnClassName+")"), //%7
+                    (paramsNames.equals("") ? "" : ", " + paramsNames), //%8
+                    (paramTypes.equals("") ? "" : ", " + paramTypes)}; //%9
+            bodyInvoker = String.format(
+                    Templates.THREAD_SAFE_INVOKER_BODY_TEMPLATE, args);
+        } else {
+            Object[] args = {clazz.getSimpleName(), name,
+                    clazz.getSimpleName() + "_NewVersion_0", paramsNames,
+                    (returnClassName.equals("void") ? "" : "return ")};
+            bodyInvoker = String.format(
+                    Templates.INVOKER_BODY_TEMPLATE, args);
+        }
         try {
             invoker.setBody(JavaParser.parseBlock(bodyInvoker));
         } catch (ParseException e) {
@@ -297,8 +326,13 @@ public class ClassCacherVisitor extends ClassVisitor {
         Object[] args = {clazz.getSimpleName() + "_NewVersion_0",
                 clazz.getSimpleName()};
 
-        String bodyCreator = String.format(Templates.CREATOR_TEMPLATE,
-                args);
+        String bodyCreator;
+        if (JMPlibConfig.getInstance().getConfigureAsThreadSafe())
+            bodyCreator = String.format(Templates.THREAD_SAFE_CREATOR_TEMPLATE,
+                    args);
+        else
+            bodyCreator = String.format(Templates.CREATOR_TEMPLATE,
+                    args);
 
         try {
             creator.setBody(JavaParser.parseBlock(bodyCreator));
@@ -401,11 +435,20 @@ public class ClassCacherVisitor extends ClassVisitor {
 
         unary.setAnnotations(annotations);
 
-        Object[] args = {name, clazz.getSimpleName() + "_NewVersion_0",
-                clazz.getSimpleName()};
+        String bodyUnary;
+        if (JMPlibConfig.getInstance().getConfigureAsThreadSafe()) {
+            Object[] args = {name, clazz.getSimpleName() + "_NewVersion_0",
+                    clazz.getSimpleName(),
+                    fieldType.getClassName(),
+                    clazz.getSimpleName() + "_NewVersion_0"};
 
-        String bodyUnary = String.format(Templates.INSTANCE_FIELD_UNARY_TEMPLATE, args);
+            bodyUnary = String.format(Templates.THREAD_SAFE_INSTANCE_FIELD_UNARY_TEMPLATE, args);
+        } else {
+            Object[] args = {name, clazz.getSimpleName() + "_NewVersion_0",
+                    clazz.getSimpleName()};
 
+            bodyUnary = String.format(Templates.INSTANCE_FIELD_UNARY_TEMPLATE, args);
+        }
         try {
             unary.setBody(JavaParser.parseBlock(bodyUnary));
         } catch (ParseException e) {

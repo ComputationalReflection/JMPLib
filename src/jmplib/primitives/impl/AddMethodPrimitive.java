@@ -15,7 +15,6 @@ import jmplib.exceptions.StructuralIntercessionException;
 import jmplib.javaparser.util.JavaParserUtils;
 import jmplib.primitives.MethodPrimitive;
 import jmplib.sourcecode.ClassContent;
-import jmplib.util.Templates;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -32,7 +31,7 @@ public class AddMethodPrimitive extends MethodPrimitive {
     public static final int MODIFIERS = Modifier.PUBLIC | Modifier.STATIC | ModifierSet.FINAL;
 
     protected MethodDeclaration declaration = null, invoker = null;
-    jmplib.reflect.TypeVariable<?>[] methodTypeParameters;
+    private jmplib.reflect.TypeVariable<?>[] methodTypeParameters;
     private String name, body;
     private String[] paramNames;
     private java.lang.reflect.Type[] genericParamTypes;
@@ -93,36 +92,35 @@ public class AddMethodPrimitive extends MethodPrimitive {
         Type returnType = JavaParserUtils.transform(returnClass);
         List<Parameter> parameter = new ArrayList<Parameter>();
         parameter.add(new Parameter(JavaParserUtils.transform(clazz), new VariableDeclaratorId("o")));
-        String paramsNames = "";
+        StringBuilder sbParamsNames = new StringBuilder();
+        StringBuilder sbParamsTypes = new StringBuilder();
         for (int i = 0; i < parameterClasses.length; i++) {
-            parameter.add(new Parameter(JavaParserUtils.transform(parameterClasses[i]),
-                    new VariableDeclaratorId("param" + i)));
-            paramsNames += "param" + i + ", ";
+            Parameter ptemp = new Parameter(JavaParserUtils.transform(parameterClasses[i]),
+                    new VariableDeclaratorId("param" + i));
+            parameter.add(ptemp);
+            sbParamsNames.append("param" + i + ", ");
+            //sbParamsTypes.append(parameterClasses[i].getName() + ".class, ");
+            sbParamsTypes.append(ptemp.getType().toString() + ".class, ");
         }
+
+        String paramsNames = sbParamsNames.toString();
         if (!paramsNames.isEmpty())
             paramsNames = paramsNames.substring(0, paramsNames.length() - 2);
+
+        String paramTypes = sbParamsTypes.toString();
+        if (paramTypes.endsWith(", "))
+            paramTypes = paramTypes.substring(0, paramTypes.length() - 2);
+
         List<AnnotationExpr> annotations = new ArrayList<AnnotationExpr>();
         NameExpr exp = JavaParserUtils.classToNameExpr(AuxiliaryMethod.class);
         annotations.add(new NormalAnnotationExpr(exp, null));
         invoker = new MethodDeclaration(AddMethodPrimitive.MODIFIERS, returnType, "_" + name + "_invoker", parameter);
         invoker.setAnnotations(annotations);
-        if (exceptionClasses != null) {
-            List<NameExpr> list = new ArrayList<NameExpr>();
-            for (Class<?> exception : exceptionClasses) {
-                list.add(new NameExpr(exception.getName()));
-            }
-            invoker.setThrows(list);
-        }
+        setThrows(invoker);
 
-        Object[] args = {clazz.getSimpleName(), name,
-                clazz.getSimpleName() + "_NewVersion_"
-                        + (classContent.isUpdated() ? classContent.getVersion() - 1 : classContent.getVersion()),
-                paramsNames, (returnClass.getName().equals("void") ? "" : "return ")};
-
-        String bodyInvoker = String.format(Templates.INVOKER_BODY_TEMPLATE, args);
-
-        invoker.setBody(JavaParser.parseBlock(bodyInvoker));
+        invoker.setBody(JavaParser.parseBlock(getBodyInvoker(name, paramsNames, paramTypes)));
     }
+
 
     /**
      * Generates the method declaration
@@ -158,13 +156,7 @@ public class AddMethodPrimitive extends MethodPrimitive {
             declaration.setTypeParameters(mtp);
         }
 
-        if (exceptionClasses != null) {
-            List<NameExpr> list = new ArrayList<NameExpr>();
-            for (Class<?> exception : exceptionClasses) {
-                list.add(new NameExpr(exception.getName()));
-            }
-            declaration.setThrows(list);
-        }
+        setThrows(declaration);
         generateBody(body);
     }
 

@@ -13,11 +13,18 @@ import java.util.Set;
 public interface Primitive {
 
     /**
+     * Return the class that is modified by this primitive.
+     *
+     * @return A java Class object.
+     */
+    Class getTargetClass();
+
+    /**
      * Revert all the changes.
      *
      * @throws StructuralIntercessionException
      */
-    public void undo() throws StructuralIntercessionException;
+    void undo() throws StructuralIntercessionException;
 
     /**
      * Apply the primitive over the {@link ClassContent}
@@ -25,13 +32,13 @@ public interface Primitive {
      * @return A set of {@link ClassContent} modified by the primitive
      * @throws StructuralIntercessionException If there are errors while performing the modificactions
      */
-    public Set<ClassContent> execute() throws StructuralIntercessionException;
+    Set<ClassContent> execute() throws StructuralIntercessionException;
 
     /**
      * Show if the primitive could provoke errors in the application
      *
      * @return false, if the application needs to recompile, true otherwise
      */
-    public boolean isSafe();
+    boolean isSafe();
 
 }

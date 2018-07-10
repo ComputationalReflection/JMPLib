@@ -15,7 +15,6 @@ import jmplib.exceptions.StructuralIntercessionException;
 import jmplib.javaparser.util.JavaParserUtils;
 import jmplib.primitives.MethodPrimitive;
 import jmplib.sourcecode.ClassContent;
-import jmplib.util.Templates;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -123,14 +122,22 @@ public class ReplaceMethodPrimitive extends MethodPrimitive {
         Type returnType = JavaParserUtils.transform(newReturnClass);
         List<Parameter> parameter = new ArrayList<Parameter>();
         parameter.add(new Parameter(JavaParserUtils.transform(clazz), new VariableDeclaratorId("o")));
-        String paramsNames = "";
+        StringBuilder sbParamsNames = new StringBuilder();
+        StringBuilder sbParamsTypes = new StringBuilder();
         for (int i = 0; i < newParameterClasses.length; i++) {
             parameter.add(new Parameter(JavaParserUtils.transform(newParameterClasses[i]),
                     new VariableDeclaratorId("param" + i)));
-            paramsNames += "param" + i + ", ";
+            sbParamsNames.append("param" + i + ", ");
+            sbParamsTypes.append(newParameterClasses[i].getName() + ".class");
         }
+        String paramsNames = sbParamsNames.toString();
         if (!paramsNames.isEmpty())
             paramsNames = paramsNames.substring(0, paramsNames.length() - 2);
+
+        String paramTypes = sbParamsTypes.toString();
+        if (paramTypes.endsWith(", "))
+            paramTypes = paramTypes.substring(0, paramTypes.length() - 2);
+
         List<AnnotationExpr> annotations = new ArrayList<AnnotationExpr>();
         NameExpr exp = JavaParserUtils.classToNameExpr(AuxiliaryMethod.class);
         annotations.add(new NormalAnnotationExpr(exp, null));
@@ -141,15 +148,8 @@ public class ReplaceMethodPrimitive extends MethodPrimitive {
             invoker.setThrows(exceptions);
         }
 
-        Object[] args = {clazz.getSimpleName(), name,
-                clazz.getSimpleName() + "_NewVersion_"
-                        + (classContent.isUpdated() ? classContent.getVersion() - 1 : classContent.getVersion()),
-                paramsNames, (newReturnClass.getName().equals("void") ? "" : "return ")};
-
-        String bodyInvoker = String.format(Templates.INVOKER_BODY_TEMPLATE, args);
-
         try {
-            invoker.setBody(JavaParser.parseBlock(bodyInvoker));
+            invoker.setBody(JavaParser.parseBlock(getBodyInvoker(name, paramsNames, paramTypes)));
         } catch (ParseException e) {
             throw new StructuralIntercessionException(e.getMessage(), e);
         }
@@ -203,7 +203,7 @@ public class ReplaceMethodPrimitive extends MethodPrimitive {
         bodyBuilder.append(");");
         bodyBuilder.append("}");
         try {
-            System.out.println(bodyBuilder.toString());
+            //System.out.println(bodyBuilder.toString());
             newBody = JavaParser.parseBlock(bodyBuilder.toString());
         } catch (ParseException e) {
             throw new RuntimeException(e.getMessage(), e);

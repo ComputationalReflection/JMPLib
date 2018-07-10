@@ -23,10 +23,12 @@ public class ConstructorVisitor extends ClassVisitor implements Opcodes {
     private Type ownerType;
     private boolean abstractClass = false;
     private boolean isVersion;
+    //private String className;
 
-    public ConstructorVisitor(int api, ClassVisitor visitor, boolean isVersion) {
+    public ConstructorVisitor(/*String className, */int api, ClassVisitor visitor, boolean isVersion) {
         super(api, visitor);
         this.isVersion = isVersion;
+        //this.className = className;
     }
 
     public ConstructorVisitor(int api, boolean isVersion) {
@@ -58,6 +60,7 @@ public class ConstructorVisitor extends ClassVisitor implements Opcodes {
         if (name.equals("<init>")) {
             MethodVisitor mv = super.visitMethod(access, name, desc, signature,
                     exceptions);
+
             mv.visitAnnotation(ASMUtils.getDescriptor(NoRedirect.class), true);
             if (abstractClass || isVersion) {
                 mv.visitEnd();

@@ -11,10 +11,8 @@ import java.util.List;
 
 public class RayTracerBenchMark extends BenchMark {
 
-    @Override
-    public void runOneIteration() {
-        JGFRayTracerBench rt = new JGFRayTracerBench();
-        rt.test();
+    public RayTracerBenchMark(Test test) {
+        super(test);
     }
 
     @Override
@@ -91,16 +89,11 @@ public class RayTracerBenchMark extends BenchMark {
             methods.add(new jmplib.reflect.Method("JGFrun", MethodType.methodType(void.class), "JGFrun1(0);",
                     Modifier.PUBLIC, new String[0]));
             methods.add(new jmplib.reflect.Method("JGFrun1", MethodType.methodType(void.class, int.class),
-                    "/*Chronometer c = new Chronometer();" + "c.start()*/;" + "JGFsetsize(size);" + "/*c.stop();"
-                            + "System.out.println(\"SetSize \" + c.GetMicroSeconds());" + "c.start();*/"
-                            + "JGFinitialise();" + "/*c.stop();"
-                            + "System.out.println(\"Initialise \" + c.GetMicroSeconds());" + "c.start();*/"
-                            + "JGFapplication();" + "/*c.stop();"
-                            + "System.out.println(\"Application \" + c.GetMicroSeconds());" + "c.start();*/"
-                            + "JGFvalidate();" + "/*c.stop();"
-                            + "System.out.println(\"Validate \" + c.GetMicroSeconds());" + "c.start();*/"
-                            + "JGFtidyup();" + "/*c.stop();"
-                            + "System.out.println(\"TidyUp \" + c.GetMicroSeconds());*/",
+                    "JGFsetsize(size);"
+                            + "JGFinitialise();"
+                            + "JGFapplication();"
+                            + "JGFvalidate();"
+                            + "JGFtidyup();",
                     Modifier.PUBLIC, new String[]{"size"}));
 
             transaction.addField(JGFRayTracerBench.class, fields.toArray(new jmplib.reflect.Field[0]));

@@ -4,6 +4,7 @@ import jmplib.annotations.ExcludeFromJMPLib;
 import jmplib.classversions.VersionTables;
 import jmplib.compiler.ClassCompiler;
 import jmplib.compiler.PolyglotAdapter;
+import jmplib.config.JMPlibConfig;
 import jmplib.exceptions.CompilationFailedException;
 import jmplib.exceptions.StructuralIntercessionException;
 import jmplib.sourcecode.SourceCodeCache;
@@ -44,11 +45,23 @@ public class IntercessorUtils {
     @SuppressWarnings("unchecked")
     public static <T> T compileFile(File file, String name, String packageName)
             throws CompilationFailedException, StructuralIntercessionException {
-        try {
-            ClassCompiler.getInstance().compile(ClassPathUtil.getApplicationClassPath(),
-                    PolyglotAdapter.instrument(file));
-        } catch (IOException e) {
-            throw new RuntimeException("Errors compiling the code: " + e.getMessage(), e);
+        if (JMPlibConfig.getInstance().getConfigureAsThreadSafe()) {
+            synchronized (ClassCompiler.getInstance()) {
+                try {
+                    ClassCompiler.getInstance().compile(ClassPathUtil.getApplicationClassPath(),
+                            PolyglotAdapter.instrument(file));
+                } catch (IOException e) {
+                    throw new RuntimeException("Errors compiling the code: " + e.getMessage(), e);
+                }
+            }
+        }
+        else {
+            try {
+                ClassCompiler.getInstance().compile(ClassPathUtil.getApplicationClassPath(),
+                        PolyglotAdapter.instrument(file));
+            } catch (IOException e) {
+                throw new RuntimeException("Errors compiling the code: " + e.getMessage(), e);
+            }
         }
         Class<?> invokerClass;
         try {

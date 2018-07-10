@@ -2,6 +2,7 @@ package jmplib.sourcecode;
 
 import jmplib.annotations.ExcludeFromJMPLib;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -43,7 +44,7 @@ public class ClassContentSerializer {
     public static File serialize(ClassContent classContent) throws IOException {
         File file = new File(classContent.getPath());
         file.createNewFile();
-        FileWriter writer = new FileWriter(file, false);
+        BufferedWriter writer = new BufferedWriter(new FileWriter(file, false));
         writer.write(classContent.getContent());
         writer.close();
         return file;

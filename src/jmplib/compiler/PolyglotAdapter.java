@@ -32,7 +32,7 @@ import polyglot.util.SilentErrorQueue;
 public class PolyglotAdapter {
     private static boolean DEBUG = true;
     private final static List<File> classPath = ClassPathUtil.getApplicationClassPath();
-    private final static String[] fixedPolyglothArgs = {"-c", "-extclass", "polyglot.ext.jl7.JL7ExtensionInfo",
+    private final static String[] fixedPolyglothArgs = {"-c", "-w", "200", "-extclass", "polyglot.ext.jl7.JL7ExtensionInfo",
             "-simpleoutput", "-classpath"};//, "-assert" };
 
     // Single polygloth compiler instance running all the time: Unfeasible as this instance do not seem to support reentries.
@@ -71,21 +71,34 @@ public class PolyglotAdapter {
 
         SilentErrorQueue errorQueue = new SilentErrorQueue(100, "errors");
         JavaSourceFromString[] sources;
-        try {
-            //System.out.println(ClassPathUtil.getApplicationClassPath());
-            //sources = new polyglot.main.Main().start(args, errorQueue).toArray(new JavaSourceFromString[0]);
-            sources = polyglothCompilerInstance.start(args, errorQueue).toArray(new JavaSourceFromString[0]);
-        } catch (TerminationException e) {
-            String error = getError(errorQueue);
-            throw new CompilationFailedException("The compilation of the classes failed.\n" + error, error);
+        if (JMPlibConfig.getInstance().getConfigureAsThreadSafe()) {
+            synchronized (polyglothCompilerInstance) {
+                try {
+                    //System.out.println(ClassPathUtil.getApplicationClassPath());
+                    //sources = new polyglot.main.Main().start(args, errorQueue).toArray(new JavaSourceFromString[0]);
+                    sources = polyglothCompilerInstance.start(args, errorQueue).toArray(new JavaSourceFromString[0]);
+                } catch (TerminationException e) {
+                    String error = getError(errorQueue);
+                    throw new CompilationFailedException("The compilation of the classes failed.\n" + error, error);
+                }
+            }
+        }
+        else {
+            try {
+                //System.out.println(ClassPathUtil.getApplicationClassPath());
+                //sources = new polyglot.main.Main().start(args, errorQueue).toArray(new JavaSourceFromString[0]);
+                sources = polyglothCompilerInstance.start(args, errorQueue).toArray(new JavaSourceFromString[0]);
+            } catch (TerminationException e) {
+                String error = getError(errorQueue);
+                throw new CompilationFailedException("The compilation of the classes failed.\n" + error, error);
+            }
         }
         for (int i = 0; i < sources.length; i++) {
             String name = files[i].getName().replaceAll("\\.java", "");
             sources[i] = new JavaSourceFromString(name, sources[i].getCode(), files[i].getAbsolutePath().hashCode());
             if (DEBUG) {
                 try {
-                    PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(files[i])));
-                    //FileWriter writer = new FileWriter(files[i]);
+                    BufferedWriter writer = new BufferedWriter(new FileWriter(files[i]));
                     writer.write(sources[i].getCode());
                     writer.close();
                 } catch (IOException e) {

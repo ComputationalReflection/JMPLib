@@ -6,9 +6,8 @@ package jmplib.classversions;
  * @author Ignacio Lagartos
  */
 public interface VersionClass {
+    Object get_OldVersion();
 
-    public Object get_OldVersion();
-
-    public void set_OldVersion(Object newValue);
+    void set_OldVersion(Object newValue);
 
 }

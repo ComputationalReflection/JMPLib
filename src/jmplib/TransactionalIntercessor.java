@@ -1,26 +1,22 @@
 package jmplib;
 
-import java.lang.invoke.MethodType;
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
-import java.util.stream.Stream;
-
+import jmplib.config.JMPlibConfig;
 import jmplib.exceptions.StructuralIntercessionException;
-import jmplib.primitives.AbstractReadPrimitive;
-import jmplib.primitives.Primitive;
-import jmplib.primitives.PrimitiveExecutor;
-import jmplib.primitives.PrimitiveFactory;
+import jmplib.primitives.*;
 import jmplib.reflect.Class;
 import jmplib.reflect.IntrospectionUtils;
 import jmplib.reflect.Introspector;
 import jmplib.reflect.TypeVariable;
 import jmplib.util.intercessor.IntercessorTypeConversion;
 import jmplib.util.intercessor.IntercessorValidators;
+
+import java.lang.invoke.MethodType;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Stream;
 
 /**
  * An intercessor of classes. This class is the fa�ade of JMPlib and provides
@@ -38,18 +34,29 @@ import jmplib.util.intercessor.IntercessorValidators;
  */
 public class TransactionalIntercessor implements IIntercessor {
 
-    protected final Queue<Primitive> primitives = new LinkedList<>();
+    protected final Queue<Primitive> primitives;
 
     /* **************************************
      * INSTANCE CREATION
      **************************************/
 
+    public TransactionalIntercessor() {
+        if (JMPlibConfig.getInstance().getConfigureAsThreadSafe()) {
+            primitives = new ConcurrentLinkedQueue<>();
+        } else primitives = new LinkedList<>();
+    }
+
     /**
      * {@inheritDoc}
      */
     public IIntercessor createIntercessor() {
+        if (!JMPlibConfig.getInstance().isAgentLoaded())
+            throw new IllegalStateException("The Updater Agent has not been loaded. JMPLib cannot be used. Please do" +
+                    " not forget to add the -javaagent:./lib/jmplib.jar parameter when running the application");
+
         return new TransactionalIntercessor();
     }
+
 
     /* **************************************
      * FIELDS
@@ -125,6 +132,7 @@ public class TransactionalIntercessor implements IIntercessor {
     /* **************************************
      * METHODS
      **************************************/
+
     /**
      * {@inheritDoc}
      */
@@ -153,12 +161,22 @@ public class TransactionalIntercessor implements IIntercessor {
                             params, mtemp.getSourceCode(), mtemp.getModifiers(), mtemp.getGenericParameterTypes(),
                             mtemp.getGenericReturnType(), mtemp.getMethodTypeParameters(), mtemp.getExceptionTypes());
                 }
+
                 primitives.add(primitive);
+                //addPrimitive(primitive);
+/*                if (JMPlibConfig.getInstance().getConfigureAsThreadSafe()) {
+                    synchronized (primitives) {
+
+                        primitives.add(primitive);
+                    }
+                }
+                else primitives.add(primitive);*/
             }
         } catch (Exception ex) {
             throw new StructuralIntercessionException(
                     "addMethod could not be executed due to the following reasons: " + ex.getMessage(), ex.getCause());
         }
+
     }
 
     /**
@@ -723,8 +741,19 @@ public class TransactionalIntercessor implements IIntercessor {
     @Override
     public void commit() throws StructuralIntercessionException {
         try {
-            PrimitiveExecutor executor = new PrimitiveExecutor(primitives);
-            executor.executePrimitives();
+            PrimitiveExecutor executor;
+            if (JMPlibConfig.getInstance().getConfigureAsThreadSafe()) {
+                synchronized (primitives) {
+                    if (primitives.size() == 0)
+                        return;
+                    executor = new ThreadSafePrimitiveExecutor(primitives);
+                    executor.executePrimitives();
+                }
+            } else {
+                executor = new PrimitiveExecutor(primitives);
+                executor.executePrimitives();
+            }
+
         } finally {
             primitives.clear();
         }

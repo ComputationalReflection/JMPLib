@@ -25,10 +25,10 @@ import java.util.*;
 @ExcludeFromJMPLib
 public class PrimitiveExecutor {
 
-    private Queue<Primitive> primitives = null;
-    private Deque<Primitive> executedPrimitives = new ArrayDeque<Primitive>();
-    private Set<ClassContent> classContents = new HashSet<ClassContent>();
-    private boolean safeChange = true;
+    protected Queue<Primitive> primitives = null;
+    Deque<Primitive> executedPrimitives = new ArrayDeque<>();
+    Set<ClassContent> classContents = new HashSet<>();
+    boolean safeChange = true;
 
     public PrimitiveExecutor(Primitive primitive) {
         if (primitive == null) {
@@ -46,26 +46,35 @@ public class PrimitiveExecutor {
     }
 
     /**
-     * Executes all primitves in order. If an error happens all primitives are
-     * undone in inverse order. The new verions are compiled and the last
-     * versions are redireted to the new version.
+     * Run all stored primitives
      *
-     * @throws StructuralIntercessionException
+     * @throws StructuralIntercessionException If an error occurs when executing the primitives.
      */
-    public synchronized void executePrimitives()
+    void runAllPrimitives() throws StructuralIntercessionException {
+        // Execute each primitive
+        while (!primitives.isEmpty()) {
+            Primitive primitive = primitives.poll();
+            // Store the affected ClassContents
+            classContents.addAll(primitive.execute());
+            // Store the primitive in the stack of executed
+            executedPrimitives.push(primitive);
+            safeChange &= primitive.isSafe();
+            // setClassContentsUpdated();
+        }
+        makeChangesEffective();
+    }
+
+    /**
+     * Executes all primitives in order. If an error happens all primitives are
+     * undone in inverse order. The new versions are compiled and the last
+     * versions are redirected to the new version.
+     *
+     * @throws StructuralIntercessionException If an error occurs when executing the primitives.
+     */
+    public void executePrimitives()
             throws StructuralIntercessionException {
         try {
-            // Execute each primitive
-            while (!primitives.isEmpty()) {
-                Primitive primitive = primitives.poll();
-                // Store the affected ClassContents
-                classContents.addAll(primitive.execute());
-                // Store the primitive in the stack of executed
-                executedPrimitives.push(primitive);
-                safeChange &= primitive.isSafe();
-                // setClassContentsUpdated();
-            }
-            makeChangesEffective();
+            runAllPrimitives();
         } catch (StructuralIntercessionException e) {
             // If the primitive fails, undo the changes of all primitive
             // executed previously
@@ -83,7 +92,7 @@ public class PrimitiveExecutor {
      *
      * @throws StructuralIntercessionException
      */
-    private void makeChangesEffective() throws StructuralIntercessionException {
+    void makeChangesEffective() throws StructuralIntercessionException {
         try {
             // Serialize the ClassContents to files
             File[] files = null;
@@ -92,6 +101,8 @@ public class PrimitiveExecutor {
             else
                 files = ClassContentSerializer.serialize(SourceCodeCache
                         .getInstance().getAll());
+
+            //System.out.println(files.length);
             // Instrument with Polyglot
             // files = PolyglotAdapter.instrument(files);
             JavaSourceFromString[] instrumented = PolyglotAdapter
@@ -106,10 +117,11 @@ public class PrimitiveExecutor {
             // Update original class references
             updateReferences();
         } catch (IOException e) {
-            throw new StructuralIntercessionException(e.getMessage(), e);
+            throw new StructuralIntercessionException("An compilation error occurred when evolving the classes. \n" +
+                    "Did you forget to run the jmplib agent? (-javaagent:./lib/jmplib.jar)\n" + e.getMessage(), e);
         } catch (CompilationFailedException e) {
-            throw new StructuralIntercessionException(e.getCompilationError(),
-                    e);
+            throw new StructuralIntercessionException("An compilation error occurred when evolving the classes. \n" +
+                    "Did you forget to run the jmplib agent? (-javaagent:./lib/jmplib.jar)\n" + e.getCompilationError(), e);
         }
     }
 
@@ -148,7 +160,8 @@ public class PrimitiveExecutor {
             } catch (IllegalArgumentException | IllegalAccessException
                     | NoSuchFieldException | SecurityException e) {
                 throw new RuntimeException(
-                        "Errors setting class version attribute: Did you load the JMPLib Agent when starting the application (-javaagent:./lib/jmplib.jar)?", e);
+                        "Errors setting class version attribute: Did you load the JMPLib Agent \n " +
+                                "when starting the application (-javaagent:./lib/jmplib.jar)?", e);
             }
         }
         UpdaterAgent.updateClass(classes.toArray(new Class<?>[0]));

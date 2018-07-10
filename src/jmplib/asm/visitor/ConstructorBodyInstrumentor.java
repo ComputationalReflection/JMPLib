@@ -32,9 +32,11 @@ public class ConstructorBodyInstrumentor extends AdviceAdapter {
         if (opcode != Opcodes.ATHROW) {
             loadThis();
             push(true);
+
             putField(ownerType, "_objCreated", Type.BOOLEAN_TYPE);
             loadThis();
             invokeVirtual(ownerType, new Method("get_ObjCreated", "()Z"));
+
             Label end = new Label();
             ifZCmp(EQ, end);
             getStatic(ownerType, "_currentClassVersion", Type.INT_TYPE);

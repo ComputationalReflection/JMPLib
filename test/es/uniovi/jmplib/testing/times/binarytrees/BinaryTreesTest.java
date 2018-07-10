@@ -6,16 +6,18 @@ public class BinaryTreesTest {
 
     @Test
     public void binaryTrees() {
+
         BenchMark mc = new BinaryTreesBenchMark(new BinaryTrees());
-        BenchMark.ITERATIONS = 10;
+        BenchMark.ITERATIONS = 12;
         mc.prepare();
-        long start = System.nanoTime();
-        mc.RunStartup();
-        long end = System.nanoTime();
-        double total = (end - start) / 1000000; // milliseconds
-//        System.out.println("BinaryTrees: " + total + "ms");
-        /*if(total > 500) { // more than 500 milliseconds
-        	fail("Too slow: " + total + "ms");
-        }*/
+        int numIts = 5;
+        int time;
+
+        System.out.println("BinaryTrees time; ");
+        for (int i = 0;i<numIts;i++) {
+            time = mc.RunStartup();
+            System.out.print(time / 1000000.0 + ";");
+        }
+        System.out.println("");
     }
 }

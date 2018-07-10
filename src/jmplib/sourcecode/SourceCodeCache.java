@@ -5,7 +5,7 @@ import com.github.javaparser.ParseException;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.expr.AnnotationExpr;
-import com.github.javaparser.ast.expr.MemberValuePair;
+import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
@@ -18,6 +18,7 @@ import jmplib.config.JMPlibConfig;
 import jmplib.exceptions.ClassNotEditableException;
 import jmplib.exceptions.StructuralIntercessionException;
 import jmplib.util.FileUtils;
+import jmplib.util.Templates;
 import jmplib.util.WrapperClassGenerator;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Opcodes;
@@ -107,7 +108,12 @@ public class SourceCodeCache {
         if (classContent != null)
             return classContent;
         try {
-            addClass(clazz);
+            if (JMPlibConfig.getInstance().getConfigureAsThreadSafe()) {
+                synchronized (this) {
+                    addClass(clazz);
+                }
+            }
+            else addClass(clazz);
         } catch (ClassNotEditableException e) {
             throw new StructuralIntercessionException(e.getMessage(), e);
         }
@@ -211,9 +217,9 @@ public class SourceCodeCache {
         if (clazz.isInterface()) {
             throw new ClassNotEditableException("Interfaces are not editable");
         }
-        File file = null;
-        File sfile = null;
-        String sr = null;
+        File file;
+        File sfile;
+        String sr;
         try {
             //Loads the file
             file = loadJavaFile(clazz);
@@ -234,11 +240,71 @@ public class SourceCodeCache {
             }
         }
         try {
-            createVersion0Class(clazz, file, true);
-        }
-        catch (Exception ex) {
+            createVersion0Class(clazz, file, false);
+        } catch (Exception ex) {
             throw new ClassNotEditableException(ex.getMessage(), ex.getCause());
         }
+    }
+
+    private FieldDeclaration createField(int modifiers, String name, String typeName, Expression init) {
+        // Auxiliary fields
+        List<VariableDeclarator> variableDeclarators = new ArrayList<>();
+        VariableDeclarator declarator = new VariableDeclarator(
+                new VariableDeclaratorId(name));
+        if (init != null)
+            declarator.setInit(init);
+        variableDeclarators.add(declarator);
+        return new FieldDeclaration(
+                modifiers, new ClassOrInterfaceType(typeName),
+                variableDeclarators);
+    }
+
+    private Collection<BodyDeclaration> createAuxiliaryMembers(Class<?> clazz, Collection<BodyDeclaration> declarations) {
+        // Auxiliary fields
+        declarations.add(createField(Modifier.PUBLIC, "_oldVersion", clazz.getName(), null));
+        if (JMPlibConfig.getInstance().getConfigureAsThreadSafe()) {
+            try {
+                declarations.add(createField(Modifier.PUBLIC, Templates.JMPLIB_MONITOR_NAME,
+                        "java.util.concurrent.locks.ReadWriteLock", null));//,
+                //JavaParser.parseExpression("new java.util.concurrent.locks.ReentrantReadWriteLock()")));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        // Getter and Setter
+        MethodDeclaration getter = null, setter = null;
+        ClassOrInterfaceType classOrInterfaceType = new ClassOrInterfaceType(
+                clazz.getName());
+        ClassOrInterfaceType voidClassOrInterfaceType = new ClassOrInterfaceType(
+                void.class.getName());
+        ClassOrInterfaceType objectClassOrInterfaceType = new ClassOrInterfaceType(
+                Object.class.getName());
+        List<AnnotationExpr> annotations = new ArrayList<>();
+        annotations.add(new NormalAnnotationExpr(new NameExpr(
+                AuxiliaryMethod.class.getName()),
+                new ArrayList<>()));
+        annotations.add(new NormalAnnotationExpr(new NameExpr(NoRedirect.class
+                .getName()), new ArrayList<>()));
+        getter = new MethodDeclaration(Modifier.PUBLIC, classOrInterfaceType,
+                "get_OldVersion");
+        getter.setAnnotations(annotations);
+
+        List<Parameter> parameter = new ArrayList<>();
+        parameter.add(new Parameter(objectClassOrInterfaceType,
+                new VariableDeclaratorId("newValue")));
+        setter = new MethodDeclaration(Modifier.PUBLIC,
+                voidClassOrInterfaceType, "set_OldVersion", parameter);
+        setter.setAnnotations(annotations);
+        try {
+            getter.setBody(JavaParser.parseBlock(Templates.GET_OLD_VERSION_TEMPLATE));
+            setter.setBody(JavaParser.parseBlock(String.format(Templates.SET_OLD_VERSION_TEMPLATE, clazz.getName())));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        declarations.add(getter);
+        declarations.add(setter);
+        return declarations;
     }
 
     /**
@@ -248,59 +314,19 @@ public class SourceCodeCache {
      * @return The list of members needed to support JMPlib versioning
      */
     private Collection<BodyDeclaration> getAuxiliaryDeclarations(Class<?> clazz) {
-        Collection<BodyDeclaration> declarations = new ArrayList<>();
+        Collection<BodyDeclaration> declarations = null;
         // Auxiliary methods
         try {
             ClassReader reader = new ClassReader(Type.getInternalName(clazz));
-            ClassCacherVisitor visitor = new ClassCacherVisitor(Opcodes.ASM4,
+            ClassCacherVisitor visitor = new ClassCacherVisitor(Opcodes.ASM5,
                     clazz);
             reader.accept(visitor, 0);
-            declarations.addAll(visitor.getDeclarations());
+            declarations = new ArrayList<>(visitor.getDeclarations());
         } catch (IOException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
+            throw new RuntimeException(e.getMessage(), e.getCause());
         }
-        // Auxiliary fields
-        List<VariableDeclarator> variableDeclarators = new ArrayList<VariableDeclarator>();
-        VariableDeclarator declarator = new VariableDeclarator(
-                new VariableDeclaratorId("_oldVersion"));
-        variableDeclarators.add(declarator);
-        FieldDeclaration fieldOldVersion = new FieldDeclaration(
-                Modifier.PUBLIC, new ClassOrInterfaceType(clazz.getName()),
-                variableDeclarators);
-        declarations.add(fieldOldVersion);
-        // Getter and Setter
-        MethodDeclaration getter = null, setter = null;
-        ClassOrInterfaceType classOrInterfaceType = new ClassOrInterfaceType(
-                clazz.getName());
-        ClassOrInterfaceType voidClassOrInterfaceType = new ClassOrInterfaceType(
-                void.class.getName());
-        ClassOrInterfaceType objectClassOrInterfaceType = new ClassOrInterfaceType(
-                Object.class.getName());
-        List<AnnotationExpr> annotations = new ArrayList<AnnotationExpr>();
-        annotations.add(new NormalAnnotationExpr(new NameExpr(
-                AuxiliaryMethod.class.getName()),
-                new ArrayList<MemberValuePair>()));
-        annotations.add(new NormalAnnotationExpr(new NameExpr(NoRedirect.class
-                .getName()), new ArrayList<MemberValuePair>()));
-        getter = new MethodDeclaration(Modifier.PUBLIC, classOrInterfaceType,
-                "get_OldVersion");
-        getter.setAnnotations(annotations);
-        List<Parameter> parameter = new ArrayList<Parameter>();
-        parameter.add(new Parameter(objectClassOrInterfaceType,
-                new VariableDeclaratorId("newValue")));
-        setter = new MethodDeclaration(Modifier.PUBLIC,
-                voidClassOrInterfaceType, "set_OldVersion", parameter);
-        setter.setAnnotations(annotations);
-        try {
-            getter.setBody(JavaParser.parseBlock("{ return _oldVersion; }"));
-            setter.setBody(JavaParser.parseBlock("{ _oldVersion = ("
-                    + clazz.getName() + ")newValue; }"));
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        declarations.add(getter);
-        declarations.add(setter);
-        return declarations;
+        return createAuxiliaryMembers(clazz, declarations);
     }
 
     /**

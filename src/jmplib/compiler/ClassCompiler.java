@@ -26,6 +26,10 @@ public class ClassCompiler {
 
     private static final String JAVA_HOME = "java.home";
     private static final ClassCompiler _instance = new ClassCompiler();
+    private static final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+    private static final StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
+
+    public static final String compilerOptions = "-g";//"-g:none";
 
     private ClassCompiler() {
     }
@@ -36,22 +40,21 @@ public class ClassCompiler {
      *
      * @param classPath The classpath of the application
      * @param files     The java files to be compiled
-     * @throws IOException If the file cannot be accessed
+     * @throws IOException                If the file cannot be accessed
      * @throws CompilationFailedException It's thrown when the file have source code errors.
      */
     public void compile(List<File> classPath, JavaFileObject... files)
             throws CompilationFailedException, IOException {
         Optional<String> javaHome = JMPlibConfig.getInstance().getJavaHome();
         javaHome.ifPresent(value -> System.setProperty(JAVA_HOME, value));
-        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-        StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
+
         Writer errors = new StringWriter();
         fileManager.setLocation(StandardLocation.CLASS_OUTPUT,
                 Collections.singletonList(new File(JMPlibConfig.getInstance().getOriginalClassPath())));
         fileManager.setLocation(StandardLocation.CLASS_PATH, classPath);
         // Compile the file
         boolean compiled = compiler.getTask(errors, fileManager, null,
-                Collections.singletonList("-g"), null, Arrays.asList(files)).call();
+                Collections.singletonList(compilerOptions), null, Arrays.asList(files)).call();
         fileManager.close();
         if (!compiled) {
             throw new CompilationFailedException("The compilation of the classes failed.\n".concat(errors.toString()),

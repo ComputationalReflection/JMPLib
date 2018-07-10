@@ -13,6 +13,7 @@ import com.github.javaparser.ast.type.Type;
 import jmplib.annotations.AuxiliaryMethod;
 import jmplib.annotations.ExcludeFromJMPLib;
 import jmplib.asm.util.ASMUtils;
+import jmplib.config.JMPlibConfig;
 import jmplib.exceptions.StructuralIntercessionException;
 import jmplib.javaparser.util.JavaParserUtils;
 import jmplib.primitives.FieldPrimitive;
@@ -157,6 +158,9 @@ public class AddFieldPrimitive extends FieldPrimitive {
                 new VariableDeclaratorId(name));
         declaration = new FieldDeclaration(modifiers, type, vd);
         if (init != null) {
+            init = init.trim();
+            if (init.startsWith("="))
+                init = init.substring(1, init.length());
             vd.setInit(JavaParser.parseExpression(init));
         }
         if (Modifier.isStatic(modifiers)) {
@@ -228,19 +232,33 @@ public class AddFieldPrimitive extends FieldPrimitive {
         getter.setAnnotations(annotations);
         setter.setAnnotations(annotations);
 
-        Object[] args = {
-                name,
-                clazz.getSimpleName()
-                        + "_NewVersion_"
-                        + (classContent.isUpdated() ? classContent.getVersion() - 1
-                        : classContent.getVersion()),
-                clazz.getSimpleName()};
-
-        String bodyGetter = String.format(
-                Templates.FIELD_GETTER_TEMPLATE, args);
-        String bodySetter = String.format(
-                Templates.FIELD_SETTER_TEMPLATE, args);
-
+        String bodyGetter;
+        String bodySetter;
+        if (JMPlibConfig.getInstance().getConfigureAsThreadSafe()) {
+            Object[] args = {name, //%1
+                    clazz.getSimpleName() + "_NewVersion_" + (classContent.isUpdated() ?
+                            classContent.getVersion() - 1
+                            : classContent.getVersion()), //%2
+                    clazz.getSimpleName(), //%3
+                    type, //%4
+                    clazz.getSimpleName() + "_NewVersion_0"}; //%5
+            bodyGetter = String.format(
+                    Templates.THREAD_SAFE_FIELD_GETTER_TEMPLATE, args);
+            bodySetter = String.format(
+                    Templates.THREAD_SAFE_FIELD_SETTER_TEMPLATE, args);
+        } else {
+            Object[] args = {
+                    name,
+                    clazz.getSimpleName()
+                            + "_NewVersion_"
+                            + (classContent.isUpdated() ? classContent.getVersion() - 1
+                            : classContent.getVersion()),
+                    clazz.getSimpleName()};
+            bodyGetter = String.format(
+                    Templates.FIELD_GETTER_TEMPLATE, args);
+            bodySetter = String.format(
+                    Templates.FIELD_SETTER_TEMPLATE, args);
+        }
         getter.setBody(JavaParser.parseBlock(bodyGetter));
         setter.setBody(JavaParser.parseBlock(bodySetter));
     }
@@ -310,16 +328,30 @@ public class AddFieldPrimitive extends FieldPrimitive {
 
         unary.setAnnotations(annotations);
 
-        Object[] args = {
-                name,
-                clazz.getSimpleName()
-                        + "_NewVersion_"
-                        + (classContent.isUpdated() ? classContent.getVersion() - 1
-                        : classContent.getVersion()),
-                clazz.getSimpleName()};
+        String bodyUnary;
+        if (JMPlibConfig.getInstance().getConfigureAsThreadSafe()) {
+            Object[] args = {name, clazz.getSimpleName()
+                    + "_NewVersion_"
+                    + (classContent.isUpdated() ? classContent.getVersion() - 1
+                    : classContent.getVersion()),
+                    clazz.getSimpleName(),
+                    fieldType,
+                    clazz.getSimpleName() + "_NewVersion_0"};
 
-        String bodyUnary = String.format(
-                Templates.INSTANCE_FIELD_UNARY_TEMPLATE, args);
+            bodyUnary = String.format(Templates.THREAD_SAFE_INSTANCE_FIELD_UNARY_TEMPLATE, args);
+        } else {
+            Object[] args = {
+                    name,
+                    clazz.getSimpleName()
+                            + "_NewVersion_"
+                            + (classContent.isUpdated() ? classContent.getVersion() - 1
+                            : classContent.getVersion()),
+                    clazz.getSimpleName()};
+
+            bodyUnary = String.format(
+                    Templates.INSTANCE_FIELD_UNARY_TEMPLATE, args);
+        }
+
 
         try {
             unary.setBody(JavaParser.parseBlock(bodyUnary));

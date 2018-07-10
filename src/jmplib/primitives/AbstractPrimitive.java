@@ -21,10 +21,10 @@ import java.util.Set;
 @ExcludeFromJMPLib
 public abstract class AbstractPrimitive implements Primitive {
 
-    protected Set<ClassContent> modifiedClasses = new HashSet<ClassContent>();
+    protected Set<ClassContent> modifiedClasses = new HashSet<>();
 
-    protected ClassContent classContent = null;
-    protected Class<?> clazz = null;
+    protected ClassContent classContent;
+    protected Class<?> clazz;
 
     protected boolean changesClassHierarchy = false;
 
@@ -33,6 +33,13 @@ public abstract class AbstractPrimitive implements Primitive {
         this.clazz = classContent.getClazz();
     }
 
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public Class getTargetClass() {
+        return clazz;
+    }
     /**
      * Increases the version number and updates the cached code to a new
      * version. These changes are done for all of the classes in the inheritance

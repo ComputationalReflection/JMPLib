@@ -1,5 +1,6 @@
 package jmplib.agent.impl;
 
+import jmplib.asm.visitor.*;
 import jmplib.config.JMPlibConfig;
 
 import static org.objectweb.asm.Opcodes.ASM5;
@@ -9,10 +10,6 @@ import java.io.File;
 import jmplib.agent.AbstractTransformer;
 import jmplib.agent.UpdaterAgent;
 import jmplib.annotations.ExcludeFromJMPLib;
-import jmplib.asm.visitor.ConstructorVisitor;
-import jmplib.asm.visitor.InstanceFieldAccessMethodVisitor;
-import jmplib.asm.visitor.NewVersionVisitor;
-import jmplib.asm.visitor.StaticFieldAccessMethodVisitor;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
@@ -38,14 +35,19 @@ public class OriginalClassLoadTimeTransformer extends AbstractTransformer {
         NewVersionVisitor newVersion = new NewVersionVisitor(ASM5, writer);
         ConstructorVisitor constructorAnnotation = new ConstructorVisitor(ASM5, newVersion, false);
         StaticFieldAccessMethodVisitor accessMethod = new StaticFieldAccessMethodVisitor(ASM5, constructorAnnotation);
-        InstanceFieldAccessMethodVisitor instanceAccesMethod = new InstanceFieldAccessMethodVisitor(ASM5, accessMethod);
-        reader.accept(instanceAccesMethod, 0);
+        InstanceFieldAccessMethodVisitor instanceAccessMethod = new InstanceFieldAccessMethodVisitor(ASM5, accessMethod);
+        if (JMPlibConfig.getInstance().getConfigureAsThreadSafe())
+        {
+            MonitorInitVisitor miv = new MonitorInitVisitor(className, ASM5, instanceAccessMethod);
+            reader.accept(miv, 0);
+        }
+        else reader.accept(instanceAccessMethod, 0);
         UpdaterAgent.instrumentables.put(className.hashCode(), className);
         return writer.toByteArray();
     }
 
     /**
-     * It is aplicable when it is the first load of the class, the class is not a
+     * It is applicable when it is the first load of the class, the class is not a
      * version class and there is a source file of the class inside the src
      * specified folder.
      */

@@ -10,17 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BinaryTreesBenchMark extends BenchMark {
-
-    private Test test = null;
-
     public BinaryTreesBenchMark(Test test) {
-        super();
-        this.test = test;
-    }
-
-    @Override
-    public void runOneIteration() {
-        test.test();
+        super(test);
     }
 
     @Override

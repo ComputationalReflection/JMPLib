@@ -10,18 +10,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 public class SourceFromSrcZipExtractor {
+    ZipFile zipFile;
     private String javaHome;
     private String srcPath;
     private Dictionary<String, ZipEntry> javaEntries = new Hashtable<String, ZipEntry>();
-    ZipFile zipFile;
-
-    private String getFullPath(String strEntry) {
-        if (strEntry.endsWith(".java"))
-            strEntry = strEntry.substring(0, strEntry.length() - ".java".length());
-
-        strEntry = strEntry.replaceAll("/", ".");
-        return strEntry;
-    }
 
     public SourceFromSrcZipExtractor() throws IOException {
         javaHome = System.getProperty("java.home");
@@ -42,6 +34,14 @@ public class SourceFromSrcZipExtractor {
                 javaEntries.put(fullPath, entry);
             }
         }
+    }
+
+    private String getFullPath(String strEntry) {
+        if (strEntry.endsWith(".java"))
+            strEntry = strEntry.substring(0, strEntry.length() - ".java".length());
+
+        strEntry = strEntry.replaceAll("/", ".");
+        return strEntry;
     }
 
     public String getSourceCode(String className) throws IOException {
