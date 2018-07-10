@@ -50,6 +50,10 @@ public class TransactionalIntercessor implements IIntercessor {
      * {@inheritDoc}
      */
     public IIntercessor createIntercessor() {
+        if (!JMPlibConfig.getInstance().isAgentLoaded())
+            throw new IllegalStateException("The Updater Agent has not been loaded. JMPLib cannot be used. Please do" +
+                    " not forget to add the -javaagent:./lib/jmplib.jar parameter when running the application");
+
         return new TransactionalIntercessor();
     }
 

@@ -256,7 +256,7 @@ public class ClassCacherVisitor extends ClassVisitor {
                     clazz.getSimpleName() + "_NewVersion_0", //%3
                     paramsNames, //%4
                     (returnClassName.equals("void") ? "" : returnClassName + " ret_value = "), //%5
-                    (returnClassName.equals("void") ? "" : " return ret_value;"), //%6
+                    (returnClassName.equals("void") ? "return;" : " return ret_value;"), //%6
                     (returnClassName.equals("void") ? "" : "(" + returnClassName+")"), //%7
                     (paramsNames.equals("") ? "" : ", " + paramsNames), //%8
                     (paramTypes.equals("") ? "" : ", " + paramTypes)}; //%9

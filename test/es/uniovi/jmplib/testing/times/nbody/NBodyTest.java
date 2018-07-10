@@ -7,7 +7,7 @@ public class NBodyTest {
     @Test
     public void nbody() {
         BenchMark mc = new NBodyBenchMark(new NBody());
-        mc.ITERATIONS = 4600000;
+        BenchMark.ITERATIONS = 80000;
         mc.prepare();
         int numIts = 5;
         int time;

@@ -1,19 +1,19 @@
 package es.uniovi.jmplib.testing.primitives.addmethod;
 
 import com.github.javaparser.ParseException;
-import jmplib.IIntercessor;
-import jmplib.SimpleIntercessor;
-import jmplib.TransactionalIntercessor;
+import jmplib.*;
 import jmplib.annotations.ExcludeFromJMPLib;
 import jmplib.classversions.VersionTables;
 import jmplib.exceptions.ClassNotEditableException;
 import jmplib.exceptions.CompilationFailedException;
 import jmplib.exceptions.StructuralIntercessionException;
+import jmplib.invokers.MemberInvokerData;
 import org.junit.Test;
 
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.function.BiFunction;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -463,4 +463,22 @@ public class AddMethodTest {
         }
     }
 
+    @Test
+    public void testAddMethod_OwnClass() {
+        Dummy2 d = new Dummy2();
+
+        d.addPrintMethod();
+        IEvaluator ev = new SimpleEvaluator().createEvaluator();
+        BiFunction<Dummy2, Integer, Integer> m = null;
+        try {
+            m = ev.getMethodInvoker(Dummy2.class,
+                    "print", new MemberInvokerData<>(BiFunction.class, Modifier.PUBLIC, new Class[]{
+                            Dummy2.class, int.class, int.class}));
+        } catch (StructuralIntercessionException e) {
+            e.printStackTrace();
+            fail();
+        }
+        int x = m.apply(d, 4);
+        assertEquals(4, x);
+    }
 }

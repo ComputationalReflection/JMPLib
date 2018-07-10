@@ -53,6 +53,7 @@ public class UpdaterAgent {
                 if (agentArgs.equals(JMPlibConfig.THREAD_SAFE_OPTION))
                     JMPlibConfig.getInstance().setConfigureAsThreadSafe(true);
             }
+            JMPlibConfig.getInstance().setAgentLoaded(true);
             run("premain", agentArgs, inst);
         } catch (StructuralIntercessionException e) {
             throw new RuntimeException("Intrumentation error", e);

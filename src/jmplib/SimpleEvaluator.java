@@ -48,6 +48,9 @@ public class SimpleEvaluator implements IEvaluator {
      * {@inheritDoc}
      */
     public IEvaluator createEvaluator() {
+        if (!JMPlibConfig.getInstance().isAgentLoaded())
+            throw new IllegalStateException("The Updater Agent has not been loaded. JMPLib cannot be used. Please do" +
+                    " not forget to add the -javaagent:./lib/jmplib.jar parameter when running the application");
         if (_instance == null) {
             if (JMPlibConfig.getInstance().getConfigureAsThreadSafe()) {
                 _instance = new ThreadSafeSimpleEvaluator();

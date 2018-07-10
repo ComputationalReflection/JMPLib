@@ -36,6 +36,16 @@ public class JMPlibConfig {
     public static final String THREAD_SAFE_OPTION = "thread_safety";
     private boolean configureAsThreadSafe = false;
 
+    public boolean isAgentLoaded() {
+        return agentLoaded;
+    }
+
+    public void setAgentLoaded(boolean agentLoaded) {
+        this.agentLoaded = agentLoaded;
+    }
+
+    private boolean agentLoaded = false;
+
     private JMPlibConfig() {
         configFileExist = new File(PROPERTY_FILE_NAME).exists();
         originalClassPath = load(ORIGINAL_CLASS_PATH_KEY).orElse(DEFAULT_ORIGINAL_CLASS_PATH);
