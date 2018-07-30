@@ -1,12 +1,5 @@
 package jmplib.compiler;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.List;
-
 import jmplib.annotations.ExcludeFromJMPLib;
 import jmplib.config.JMPlibConfig;
 import jmplib.exceptions.CompilationFailedException;
@@ -16,6 +9,12 @@ import jmplib.util.JavaSourceFromString;
 import polyglot.main.Main.TerminationException;
 import polyglot.util.ErrorInfo;
 import polyglot.util.SilentErrorQueue;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.List;
 
 /**
  * This class fits the functionality of Polyglot inside the library.
@@ -34,19 +33,32 @@ public class PolyglotAdapter {
     private final static List<File> classPath = ClassPathUtil.getApplicationClassPath();
     private final static String[] fixedPolyglothArgs = {"-c", "-w", "200", "-extclass", "polyglot.ext.jl7.JL7ExtensionInfo",
             "-simpleoutput", "-classpath"};//, "-assert" };
+    private final static int fixedArgsLength = fixedPolyglothArgs.length;
 
     // Single polygloth compiler instance running all the time: Unfeasible as this instance do not seem to support reentries.
     private final static polyglot.main.Main polyglothCompilerInstance = new polyglot.main.Main();
 
-    private static String[] createPolyglotArguments(File[] files) {
+    private static String argPath = null;
+
+    private static void createArgPath() {
         StringBuilder argPathSB = new StringBuilder();
         for (File file : classPath) {
             argPathSB.append(file.getAbsolutePath());
             argPathSB.append(JMPlibConfig.getInstance().getPathSeparator());
         }
-        String argPath = argPathSB.substring(0, argPathSB.length() - 1);
+        argPath = argPathSB.substring(0, argPathSB.length() - 1);
+    }
 
-        int fixedArgsLength = fixedPolyglothArgs.length;
+    private static String[] createPolyglotArguments(File[] files) {
+//        StringBuilder argPathSB = new StringBuilder();
+//        for (File file : classPath) {
+//            argPathSB.append(file.getAbsolutePath());
+//            argPathSB.append(JMPlibConfig.getInstance().getPathSeparator());
+//        }
+//        String argPath = argPathSB.substring(0, argPathSB.length() - 1);
+        if (argPath == null)
+            createArgPath();
+
         // Make arguments for polyglot
         String[] args = new String[files.length + fixedArgsLength + 1];
         // Efficient copy of fixed arguments
@@ -56,6 +68,7 @@ public class PolyglotAdapter {
         for (int i = 0; i < files.length; i++) {
             args[i + fixedArgsLength + 1] = files[i].getAbsolutePath();
         }
+
         return args;
     }
 
@@ -82,8 +95,7 @@ public class PolyglotAdapter {
                     throw new CompilationFailedException("The compilation of the classes failed.\n" + error, error);
                 }
             }
-        }
-        else {
+        } else {
             try {
                 //System.out.println(ClassPathUtil.getApplicationClassPath());
                 //sources = new polyglot.main.Main().start(args, errorQueue).toArray(new JavaSourceFromString[0]);
@@ -96,6 +108,7 @@ public class PolyglotAdapter {
         for (int i = 0; i < sources.length; i++) {
             String name = files[i].getName().replaceAll("\\.java", "");
             sources[i] = new JavaSourceFromString(name, sources[i].getCode(), files[i].getAbsolutePath().hashCode());
+            sources[i].setFileData(files[i]);
             if (DEBUG) {
                 try {
                     BufferedWriter writer = new BufferedWriter(new FileWriter(files[i]));

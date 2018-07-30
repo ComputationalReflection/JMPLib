@@ -123,7 +123,7 @@ public class UpdaterAgent {
         File bin = new File(config.getOriginalClassPath());
         File file = new File(config.getModifiedClassPath());
         if (file.exists()) {
-            FileUtils.deleteFile(file);
+            FileUtils.foreceDeleteFile(file);
         }
         FileUtils.copyDirectory(bin, file);
     }

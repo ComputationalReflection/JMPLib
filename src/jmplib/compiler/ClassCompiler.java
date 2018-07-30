@@ -31,6 +31,17 @@ public class ClassCompiler {
 
     public static final String compilerOptions = "-g";//"-g:none";
 
+    static {
+        Optional<String> javaHome = JMPlibConfig.getInstance().getJavaHome();
+        javaHome.ifPresent(value -> System.setProperty(JAVA_HOME, value));
+        try {
+            fileManager.setLocation(StandardLocation.CLASS_OUTPUT,
+                    Collections.singletonList(new File(JMPlibConfig.getInstance().getOriginalClassPath())));
+        }
+        catch (IOException ioex) {
+            throw new RuntimeException("An error ocurred when initializing JMPLib version generation system: " + ioex.getMessage(), ioex.getCause());
+        }
+    }
     private ClassCompiler() {
     }
 
@@ -45,12 +56,12 @@ public class ClassCompiler {
      */
     public void compile(List<File> classPath, JavaFileObject... files)
             throws CompilationFailedException, IOException {
-        Optional<String> javaHome = JMPlibConfig.getInstance().getJavaHome();
-        javaHome.ifPresent(value -> System.setProperty(JAVA_HOME, value));
-
+//        Optional<String> javaHome = JMPlibConfig.getInstance().getJavaHome();
+//        javaHome.ifPresent(value -> System.setProperty(JAVA_HOME, value));
+//
         Writer errors = new StringWriter();
-        fileManager.setLocation(StandardLocation.CLASS_OUTPUT,
-                Collections.singletonList(new File(JMPlibConfig.getInstance().getOriginalClassPath())));
+//        fileManager.setLocation(StandardLocation.CLASS_OUTPUT,
+//                Collections.singletonList(new File(JMPlibConfig.getInstance().getOriginalClassPath())));
         fileManager.setLocation(StandardLocation.CLASS_PATH, classPath);
         // Compile the file
         boolean compiled = compiler.getTask(errors, fileManager, null,

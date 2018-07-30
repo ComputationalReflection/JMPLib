@@ -36,6 +36,17 @@ public class JMPlibConfig {
     public static final String THREAD_SAFE_OPTION = "thread_safety";
     private boolean configureAsThreadSafe = false;
 
+    public boolean isDeleteGeneratedFiles() {
+        return deleteGeneratedFiles;
+    }
+
+    public void setDeleteGeneratedFiles(boolean deleteGeneratedFiles) {
+        this.deleteGeneratedFiles = deleteGeneratedFiles;
+    }
+
+    private boolean deleteGeneratedFiles = true;
+
+
     public boolean isAgentLoaded() {
         return agentLoaded;
     }

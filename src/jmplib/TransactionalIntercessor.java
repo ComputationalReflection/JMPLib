@@ -750,6 +750,8 @@ public class TransactionalIntercessor implements IIntercessor {
                     executor.executePrimitives();
                 }
             } else {
+                if (primitives.size() == 0)
+                    return;
                 executor = new PrimitiveExecutor(primitives);
                 executor.executePrimitives();
             }

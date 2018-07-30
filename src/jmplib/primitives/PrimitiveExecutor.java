@@ -15,6 +15,10 @@ import jmplib.util.JavaSourceFromString;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.MessageDigest;
 import java.util.*;
 
 /**
@@ -109,6 +113,9 @@ public class PrimitiveExecutor {
                     .instrument(files);
             if (!safeChange)
                 instrumented = filterInstrumented(instrumented);
+
+            //instrumented = filterNewfiles(instrumented);
+
             // Compile the new java files
             ClassCompiler.getInstance().compile(
                     ClassPathUtil.getApplicationClassPath(), instrumented);
@@ -125,6 +132,58 @@ public class PrimitiveExecutor {
         }
     }
 
+    static MessageDigest digest;
+
+    static {
+        try {
+            digest = MessageDigest.getInstance("SHA-256");
+        } catch (Exception ex) {
+        }
+    }
+
+    private String generateContentHash(String content) {
+        if (digest == null) return content;
+
+        byte[] hash = digest.digest(content.getBytes(StandardCharsets.UTF_8));
+        return Base64.getEncoder().encodeToString(hash);
+    }
+
+    private JavaSourceFromString[] filterNewfiles(JavaSourceFromString[] instrumented) {
+        List<JavaSourceFromString> filtered = new ArrayList<>();
+        File ftemp;
+        String ftxt1;
+        String ftxt2 = null;
+
+        for (JavaSourceFromString file : instrumented) {
+            ftemp = file.getFileData();
+            Path path = ftemp.toPath();
+
+            if (ftemp.exists()) {
+                ftxt1 = generateContentHash(file.getCode());
+                try {
+                    ftxt2 = Files.getAttribute(path, "contentHash").toString();
+                } catch (Exception ex) {
+                    try {
+                        Files.setAttribute(path, "contentHash", generateContentHash(file.getCode()));
+                    } catch (Exception ex2) {
+                    }
+                }
+                if (ftxt1.equals(ftxt2)) {
+                    System.out.println("Skipped generation of: " + ftxt1);
+                    continue;
+                }
+            } else {
+                try {
+                    System.out.println("Write metadata to: " + file.getClassName());
+                    Files.setAttribute(path, "contentHash", generateContentHash(file.getCode()));
+                } catch (Exception ex) {
+                }
+            }
+            filtered.add(file);
+        }
+        return filtered.toArray(new JavaSourceFromString[0]);
+    }
+
     /**
      * Filter the instrumented java files to compile only the new versions
      *
@@ -133,7 +192,7 @@ public class PrimitiveExecutor {
      */
     private JavaSourceFromString[] filterInstrumented(
             JavaSourceFromString[] instrumented) {
-        List<JavaSourceFromString> filtered = new ArrayList<JavaSourceFromString>();
+        List<JavaSourceFromString> filtered = new ArrayList<>();
         for (JavaSourceFromString file : instrumented) {
             for (ClassContent classContent : classContents) {
                 if (classContent.getPath().hashCode() == file.getIdentifier()) {
