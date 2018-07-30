@@ -1,6 +1,7 @@
 package jmplib.util;
 
 import jmplib.annotations.ExcludeFromJMPLib;
+import jmplib.config.JMPlibConfig;
 import jmplib.exceptions.StructuralIntercessionException;
 
 import java.io.File;
@@ -30,12 +31,7 @@ public class FileUtils {
         }
     }
 
-    /**
-     * Delete a File. If it is a directory then, deletes all subitems recusively
-     *
-     * @param file The file to delete
-     */
-    public static void deleteFile(File file) {
+    public static void foreceDeleteFile(File file) {
         if (file.isDirectory()) {
             File[] files = file.listFiles();
             for (File subFile : files) {
@@ -45,6 +41,20 @@ public class FileUtils {
         } else {
             file.delete();
         }
+    }
+    /**
+     * Delete a File. If it is a directory then, deletes all subitems recusively
+     *
+     * @param file The file to delete
+     */
+    public static void deleteFile(File file) {
+        try {
+            if (!JMPlibConfig.getInstance().isDeleteGeneratedFiles())
+                return;
+        }
+        catch (Exception ex) {}
+
+        foreceDeleteFile(file);
     }
 
     /**

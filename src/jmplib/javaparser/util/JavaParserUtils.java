@@ -512,6 +512,18 @@ public class JavaParserUtils {
         for (int i = 0; i < parameterClasses.length; i++) {
             // System.out.println(parameters[i] + " is a type parameter " +
             // isATypeParameter(method, parameters[i]) );
+            if (checkParameter(parameters[i], parameterClasses[i], imports, packageDeclaration)) {
+                continue;
+            }
+            else {
+                if (isATypeParameter(method, parameters[i])) {
+                    if (!parameterClasses[i].getName().equals("java.lang.Object"))
+                        return false;
+                }
+                else return false;
+            }
+
+            /*
             if (isATypeParameter(method, parameters[i])) {
                 if (!parameterClasses[i].getName().equals("java.lang.Object"))
                     return false;
@@ -519,7 +531,7 @@ public class JavaParserUtils {
             }
             if (!checkParameter(parameters[i], parameterClasses[i], imports, packageDeclaration)) {
                 return false;
-            }
+            }*/
         }
         return true;
     }
@@ -537,12 +549,23 @@ public class JavaParserUtils {
                                             PackageDeclaration packageDeclaration, Class<?> returnClass) {
         // System.out.println(method.getType() + ": " + isATypeParameter(method,
         // method.getType()));
+        if (checkType(method.getType(), returnClass, imports, packageDeclaration))
+            return true;
+
         if (isATypeParameter(method, method.getType())) {
             if (!returnClass.getName().equals("java.lang.Object"))
                 return false;
             return true;
         }
-        return checkType(method.getType(), returnClass, imports, packageDeclaration);
+        return false;
+
+        /*
+        if (isATypeParameter(method, method.getType())) {
+            if (!returnClass.getName().equals("java.lang.Object"))
+                return false;
+            return true;
+        }
+        return checkType(method.getType(), returnClass, imports, packageDeclaration);*/
     }
 
     /**

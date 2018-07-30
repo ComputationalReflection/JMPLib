@@ -28,8 +28,12 @@ public class ClassContentSerializer {
     public static File[] serialize(Collection<ClassContent> classContents)
             throws IOException {
         List<File> files = new ArrayList<>();
+        File temp;
+
         for (ClassContent classContent : classContents) {
-            files.add(serialize(classContent));
+            temp = serialize(classContent);
+            if (temp!=null)
+                files.add(temp);
         }
         return files.toArray(new File[0]);
     }

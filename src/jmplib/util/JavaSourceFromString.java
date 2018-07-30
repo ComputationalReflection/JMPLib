@@ -3,6 +3,7 @@ package jmplib.util;
 import jmplib.annotations.ExcludeFromJMPLib;
 
 import javax.tools.SimpleJavaFileObject;
+import java.io.File;
 import java.net.URI;
 
 @ExcludeFromJMPLib
@@ -15,6 +16,16 @@ public class JavaSourceFromString extends SimpleJavaFileObject {
     final String className;
 
     final int identifier;
+
+    public File getFileData() {
+        return fileData;
+    }
+
+    public void setFileData(File fileData) {
+        this.fileData = fileData;
+    }
+
+    File fileData;
 
     /**
      * Constructs a new JavaSourceFromString.
@@ -36,7 +47,7 @@ public class JavaSourceFromString extends SimpleJavaFileObject {
      * @param name    the name of the compilation unit represented by this file object
      * @param code    the source code for the compilation unit represented by this file
      *                object
-     * @param hascode the hascode of the path
+     * @param identifier the hashcode of the path
      */
     public JavaSourceFromString(String name, String code, int identifier) {
         super(URI.create("string:///" + name.replace('.', '/') + Kind.SOURCE.extension), Kind.SOURCE);
