@@ -4,7 +4,7 @@ Dynamic languages are widely used due to the flexibility needed in some applicat
 
 ## Sources and binaries
 
-The last stable version of the source code and its binaries are available in this repository. The previous version of this project is available in [previous release](https://github.com/ilagartos/jmplib/releases/).
+The last stable version of the source code and its binaries are available in the [releases](https://github.com/ComputationalReflection/JMPLib/releases) section. The previous version of this project is available in this [previous release](https://github.com/ilagartos/jmplib/releases/) repository.
 
 ## How to use it!
 
