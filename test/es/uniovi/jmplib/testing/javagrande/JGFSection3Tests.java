@@ -36,47 +36,48 @@ public class JGFSection3Tests {
         try {
             JGFInstrumentor.printHeader(3, size);
 
-/*
+
             es.uniovi.jmplib.testing.javagrande.euler_meta.JGFEulerBench ebmeta =
                     new es.uniovi.jmplib.testing.javagrande.euler_meta.JGFEulerBench();
             ebmeta.JGFrun(size);
-*/
-            /*
-            JGFEulerBench eb = new JGFEulerBench();
+
+
+            es.uniovi.jmplib.testing.javagrande.euler.JGFEulerBench eb = new es.uniovi.jmplib.testing.javagrande.euler.JGFEulerBench();
             eb.JGFrun(size);
-*/
 
 
-/*
+
+
             es.uniovi.jmplib.testing.javagrande.moldyn.JGFMolDynBench mdb =
                     new es.uniovi.jmplib.testing.javagrande.moldyn.JGFMolDynBench();
             mdb.JGFrun(size);
-*/
-/*
-            es.uniovi.jmplib.testing.javagrande.moldyn_meta.JGFMolDynBench mdb =
+
+
+            es.uniovi.jmplib.testing.javagrande.moldyn_meta.JGFMolDynBench mdbmeta =
                     new es.uniovi.jmplib.testing.javagrande.moldyn_meta.JGFMolDynBench();
-            mdb.JGFrun(size);
-*/
+            mdbmeta.JGFrun(size);
 
-            es.uniovi.jmplib.testing.javagrande.montecarlo_meta.JGFMonteCarloBench mcb =
+
+
+            es.uniovi.jmplib.testing.javagrande.montecarlo_meta.JGFMonteCarloBench mcbmeta =
                     new es.uniovi.jmplib.testing.javagrande.montecarlo_meta.JGFMonteCarloBench();
-            mcb.JGFrun(size);
+            mcbmeta.JGFrun(size);
 
-/*
+
             es.uniovi.jmplib.testing.javagrande.montecarlo.JGFMonteCarloBench mcb =
                     new es.uniovi.jmplib.testing.javagrande.montecarlo.JGFMonteCarloBench();
             mcb.JGFrun(size);
-*/
 
-/*
+
+
             es.uniovi.jmplib.testing.javagrande.search.JGFSearchBench sb =
                     new es.uniovi.jmplib.testing.javagrande.search.JGFSearchBench();
-            sb.JGFrun(size);*/
+            sb.JGFrun(size);
 
-/*
-            es.uniovi.jmplib.testing.javagrande.search_meta.JGFSearchBench sb =
+
+            es.uniovi.jmplib.testing.javagrande.search_meta.JGFSearchBench sbmeta =
                     new es.uniovi.jmplib.testing.javagrande.search_meta.JGFSearchBench();
-            sb.JGFrun(size);*/
+            sbmeta.JGFrun(size);
 
         } catch (Exception ex) {
             ex.printStackTrace();
