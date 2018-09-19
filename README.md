@@ -49,7 +49,8 @@ package addmethod;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Modifier;
 
-import jmplib.IntercessorTransaction;
+import jmplib.IIntercessor;
+import jmplib.TransactionalIntercessor;
 
 public class AddMethodMain {
 
