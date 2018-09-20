@@ -144,4 +144,5 @@ As you can see, the last line shows the new information due to the car instance 
 
 ## More info
 
-See [javadoc](https://cdn.rawgit.com/ilagartos/jmplib/master/docs/index.html)
+See [javadoc](https://computationalreflection.github.io/JMPLib/) of the current version of the project (1.1.0)
+See [javadoc](https://cdn.rawgit.com/ilagartos/jmplib/master/docs/index.html) of the 1.0.0 version 
