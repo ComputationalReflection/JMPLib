@@ -36,6 +36,9 @@ public class JMPlibConfig {
     public static final String THREAD_SAFE_OPTION = "thread_safety";
     private boolean configureAsThreadSafe = false;
 
+    public static final String REPLACE_IS_INSTANCE_OPTION = "disable_is_instance";
+    private boolean replaceIsInstance = true;
+
     public boolean isDeleteGeneratedFiles() {
         return deleteGeneratedFiles;
     }
@@ -121,5 +124,13 @@ public class JMPlibConfig {
 
     public void setConfigureAsThreadSafe(boolean newValue) {
         configureAsThreadSafe = newValue;
+    }
+
+    public boolean getReplaceIsInstance() {
+        return replaceIsInstance;
+    }
+
+    public void setReplaceIsInstance(boolean newValue) {
+        replaceIsInstance = newValue;
     }
 }

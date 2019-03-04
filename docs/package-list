@@ -2,6 +2,7 @@ jmplib
 jmplib.agent
 jmplib.agent.impl
 jmplib.annotations
+jmplib.asm
 jmplib.asm.util
 jmplib.asm.visitor
 jmplib.classversions

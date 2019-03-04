@@ -68,7 +68,7 @@ public class Introspector {
     /**
      * Puts a decorator to a java.lang.reflect.Method array
      *
-     * @param method A java.lang.Method array
+     * @param methods A java.lang.Method array
      * @return The decorated java.lang.reflect.Method array
      */
     public static jmplib.reflect.Method[] decorateMethods(java.lang.reflect.Method[] methods) {
@@ -78,7 +78,7 @@ public class Introspector {
     /**
      * Puts a decorator to a java.lang.reflect.Field instance
      *
-     * @param method A java.lang.reflect.Field object
+     * @param field A java.lang.reflect.Field object
      * @return The decorated java.lang.reflect.Field
      * @throws NoSuchFieldException
      */
@@ -90,10 +90,30 @@ public class Introspector {
     /**
      * Puts a decorator to a java.lang.reflect.Field array
      *
-     * @param method A java.lang.reflect.Field array
+     * @param fields A java.lang.reflect.Field array
      * @return The decorated java.lang.reflect.Field array
      */
     public static jmplib.reflect.Field[] decorateFields(java.lang.reflect.Field[] fields) throws NoSuchFieldException {
         return IntrospectionUtils.decorateFieldList(fields);
+    }
+
+    /**
+     * Method equivalent to perform an instanceof
+     * @param obj object to check
+     * @param clazz Class to compare the object with
+     * @return If the object is an instance of the class or not
+     */
+    public static boolean instanceOf(Object obj, java.lang.Class clazz) {
+        return decorateClass(clazz).isAssignableFrom(obj.getClass());
+    }
+
+    /**
+     * Cast obj to castTarget
+     * @param castTarget Class to cast to
+     * @param obj Object to cast
+     * @return Casted object
+     */
+    public static Object cast (java.lang.Class castTarget, Object obj) {
+        return decorateClass(castTarget).cast(obj);
     }
 }

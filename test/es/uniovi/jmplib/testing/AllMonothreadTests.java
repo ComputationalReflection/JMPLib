@@ -9,6 +9,7 @@ import es.uniovi.jmplib.testing.imports.ImportTest;
 import es.uniovi.jmplib.testing.inheritance.InheritanceStaticTest;
 import es.uniovi.jmplib.testing.instrumentation.InstrumentationTest;
 import es.uniovi.jmplib.testing.invokers.InvokersTest;
+import es.uniovi.jmplib.testing.isinstance_cast.IsInstanceCastInterfacesTest;
 import es.uniovi.jmplib.testing.modifiers.ModifierStaticTest;
 import es.uniovi.jmplib.testing.parser_integration.JavaParserIntegrationTest;
 import es.uniovi.jmplib.testing.primitives.FieldTest;
@@ -37,7 +38,7 @@ import java.io.Serializable;
         DynamicInheritanceInterfacesTest.class, AnnotationTest.class,
         GenericTest.class, ImportTest.class, AddMembersWithReflectionTest.class,
         ExtendedReflectionTest.class, ReflectionSourceCodeTest.class,
-        ExternalFieldAccesTest.class, JavaParserIntegrationTest.class})
+        ExternalFieldAccesTest.class, JavaParserIntegrationTest.class, IsInstanceCastInterfacesTest.class})
 public class AllMonothreadTests implements Serializable {
 
     private static final long serialVersionUID = 1L;

@@ -657,6 +657,13 @@ public class Class<T> implements java.io.Serializable, GenericDeclaration, Type,
         if (lastVersion.isAssignableFrom(cls) || this.decoratedClass.isAssignableFrom(cls))
             return true;
 
+        try {
+            if (lastVersion.isAssignableFrom(VersionTables.getNewVersion(cls)))
+                return true;
+        }
+        catch (Exception ex) {
+
+        }
         // Returns true if the object is an instance of any of the class versions
         for (java.lang.Class<?> version : versions) {
             if (version.isAssignableFrom(cls))

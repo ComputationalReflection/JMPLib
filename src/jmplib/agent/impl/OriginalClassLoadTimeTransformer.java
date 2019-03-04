@@ -1,18 +1,16 @@
 package jmplib.agent.impl;
 
-import jmplib.asm.visitor.*;
-import jmplib.config.JMPlibConfig;
-
-import static org.objectweb.asm.Opcodes.ASM5;
-
-import java.io.File;
-
 import jmplib.agent.AbstractTransformer;
 import jmplib.agent.UpdaterAgent;
 import jmplib.annotations.ExcludeFromJMPLib;
-
+import jmplib.asm.visitor.*;
+import jmplib.config.JMPlibConfig;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
+
+import java.io.File;
+
+import static org.objectweb.asm.Opcodes.ASM5;
 
 /**
  * This transformer modifies original classes to add new fields and methods to
@@ -32,17 +30,19 @@ public class OriginalClassLoadTimeTransformer extends AbstractTransformer {
     protected byte[] transform(String className, Class<?> classBeingRedefined, byte[] classfileBuffer) {
         ClassReader reader = new ClassReader(classfileBuffer);
         ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+
         NewVersionVisitor newVersion = new NewVersionVisitor(ASM5, writer);
         ConstructorVisitor constructorAnnotation = new ConstructorVisitor(ASM5, newVersion, false);
         StaticFieldAccessMethodVisitor accessMethod = new StaticFieldAccessMethodVisitor(ASM5, constructorAnnotation);
         InstanceFieldAccessMethodVisitor instanceAccessMethod = new InstanceFieldAccessMethodVisitor(ASM5, accessMethod);
-        if (JMPlibConfig.getInstance().getConfigureAsThreadSafe())
-        {
+        if (JMPlibConfig.getInstance().getConfigureAsThreadSafe()) {
             MonitorInitVisitor miv = new MonitorInitVisitor(className, ASM5, instanceAccessMethod);
             reader.accept(miv, 0);
+        } else {
+            reader.accept(instanceAccessMethod, 0);
         }
-        else reader.accept(instanceAccessMethod, 0);
         UpdaterAgent.instrumentables.put(className.hashCode(), className);
+
         return writer.toByteArray();
     }
 

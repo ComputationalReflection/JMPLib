@@ -58,57 +58,57 @@ public class DynamicInheritanceSuperClassTest {
         return testList;
     }
 
-    /**
-     * Change superclass test from the ENASE paper
-     */
-    @Ignore
-    @SuppressWarnings({"unchecked", "unused"})
-    @Test
-    public void changeSuperClassTest() {
-        // Obtain a Dog list
-        List<DogDHSetSuper> dogs = getDogList();
-        int previousSize = dogs.size();
-
-        //TO DO
-
-        // Sort as a Comparable (by dog name)
-		/*
-		try {
-			Evaluator.generateEvalInvoker(
-					"java.util.Collections.sort((java.util.List<es.uniovi.jmplib.testing.dynamicinheritance.classes.DogDHSetSuper>)dogs);",
-					new EvalInvokerData<>(Consumer.class, new String[] { "dogs" }, List.class)).accept(dogs);
-		} catch (StructuralIntercessionException e) {
-			e.printStackTrace();
-			fail();
-		}*/
-
-        // Change the superclass of Dog
-        try {
-            Intercessor.setSuperclass(DogDHSetSuper.class, Pet.class);
-        } catch (StructuralIntercessionException e1) {
-            e1.printStackTrace();
-            fail();
-        }
-
-        // * WARNING * Lambda usage is not supported due to Polyglot not supporting 1.8
-        // features.
-        // Lambda expression to sort using pet age
-        // Comparator<Pet> sortCriteria = (pet1, pet2) -> pet1.getAge() - pet2.getAge();
-        //
-        // // Sort using Pet attributes, since now is our parent class
-        // try {
-        // Evaluator
-        // .generateEvalInvoker("Collections.sort(pets, criteria);", BiConsumer.class,
-        // new String[] { "pets", "criteria" }, List.class, Comparator.class)
-        // .accept(dogs, sortCriteria);
-        // } catch (StructuralIntercessionException e) {
-        // e.printStackTrace();
-        // fail();
-        // }
-        //
-        // assertTrue(previousSize == dogs.size());
-        fail(); //Unfinished
-    }
+//    /**
+//     * Change superclass test from the ENASE paper
+//     */
+//    @Ignore
+//    @SuppressWarnings({"unchecked", "unused"})
+//    @Test
+//    public void changeSuperClassTest() {
+//        // Obtain a Dog list
+//        List<DogDHSetSuper> dogs = getDogList();
+//        int previousSize = dogs.size();
+//
+//        //TO DO
+//
+//        // Sort as a Comparable (by dog name)
+//		/*
+//		try {
+//			Evaluator.generateEvalInvoker(
+//					"java.util.Collections.sort((java.util.List<es.uniovi.jmplib.testing.dynamicinheritance.classes.DogDHSetSuper>)dogs);",
+//					new EvalInvokerData<>(Consumer.class, new String[] { "dogs" }, List.class)).accept(dogs);
+//		} catch (StructuralIntercessionException e) {
+//			e.printStackTrace();
+//			fail();
+//		}*/
+//
+//        // Change the superclass of Dog
+//        try {
+//            Intercessor.setSuperclass(DogDHSetSuper.class, Pet.class);
+//        } catch (StructuralIntercessionException e1) {
+//            e1.printStackTrace();
+//            fail();
+//        }
+//
+//        // * WARNING * Lambda usage is not supported due to Polyglot not supporting 1.8
+//        // features.
+//        // Lambda expression to sort using pet age
+//        // Comparator<Pet> sortCriteria = (pet1, pet2) -> pet1.getAge() - pet2.getAge();
+//        //
+//        // // Sort using Pet attributes, since now is our parent class
+//        // try {
+//        // Evaluator
+//        // .generateEvalInvoker("Collections.sort(pets, criteria);", BiConsumer.class,
+//        // new String[] { "pets", "criteria" }, List.class, Comparator.class)
+//        // .accept(dogs, sortCriteria);
+//        // } catch (StructuralIntercessionException e) {
+//        // e.printStackTrace();
+//        // fail();
+//        // }
+//        //
+//        // assertTrue(previousSize == dogs.size());
+//        fail(); //Unfinished
+//    }
 
     /**
      * Changes the superclass of a class from Animal to Per and try to cast to it
