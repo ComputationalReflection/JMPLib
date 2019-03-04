@@ -73,5 +73,6 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="jmplib" level="project" />
   </component>
 </module>

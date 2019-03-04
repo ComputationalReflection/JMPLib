@@ -50,8 +50,10 @@ public class UpdaterAgent {
     public static void premain(String agentArgs, Instrumentation inst) {
         try {
             if (agentArgs != null) {
-                if (agentArgs.equals(JMPlibConfig.THREAD_SAFE_OPTION))
+                if (agentArgs.contains(JMPlibConfig.THREAD_SAFE_OPTION))
                     JMPlibConfig.getInstance().setConfigureAsThreadSafe(true);
+                if (agentArgs.contains(JMPlibConfig.REPLACE_IS_INSTANCE_OPTION))
+                    JMPlibConfig.getInstance().setReplaceIsInstance(false);
             }
             JMPlibConfig.getInstance().setAgentLoaded(true);
             run("premain", agentArgs, inst);
@@ -103,6 +105,10 @@ public class UpdaterAgent {
         ChangeWriterTransformer writer = new ChangeWriterTransformer();
         RedirectMethodTransformer redirect = new RedirectMethodTransformer();
 
+
+        if (JMPlibConfig.getInstance().getReplaceIsInstance()) {
+            inst.addTransformer(new IsInstanceTransformer(), false);
+        }
         inst.addTransformer(originalLoadTransformer);
         inst.addTransformer(versionLoadTransformer);
         inst.addTransformer(defaultMethodTransformer);
@@ -110,6 +116,7 @@ public class UpdaterAgent {
         inst.addTransformer(redirect, true);
         inst.addTransformer(externalFieldAccessTransformer, true);
         inst.addTransformer(writer);
+
     }
 
     /**

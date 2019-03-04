@@ -10,6 +10,7 @@
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/custom-polyglot.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/java_cup.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/javaparser-core-2.3.0.jar" path-in-jar="/" />
+      <element id="file-copy" path="$PROJECT_DIR$/lib/jmplib-reflect.jar" />
     </root>
   </artifact>
 </component>

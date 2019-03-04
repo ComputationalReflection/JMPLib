@@ -71,19 +71,19 @@ public class AnnotationTest {
         }
     }
 
-    @Ignore
-    @Test
-    public void testAddClassAnnotationToMethod() {
-        // TODO - Este test da problemas, se borran todas las anotaciones de la clase al hacer el undo de la primitiva y fallan test posteriores
-        Annotation[] annots = null;
-        try {
-            Intercessor.addAnnotation(Introspector.decorateClass(AnnotationTestClass.class).getMethod("testMethod"),
-                    SampleAnnotation.class);
-            fail();
-        } catch (StructuralIntercessionException | NoSuchMethodException | SecurityException e) {
-            e.printStackTrace();
-        }
-    }
+//    @Ignore
+//    @Test
+//    public void testAddClassAnnotationToMethod() {
+//        // TODO - Este test da problemas, se borran todas las anotaciones de la clase al hacer el undo de la primitiva y fallan test posteriores
+//        Annotation[] annots = null;
+//        try {
+//            Intercessor.addAnnotation(Introspector.decorateClass(AnnotationTestClass.class).getMethod("testMethod"),
+//                    SampleAnnotation.class);
+//            fail();
+//        } catch (StructuralIntercessionException | NoSuchMethodException | SecurityException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     @Test
     public void testAddMultipleAnnotationsToClass() {

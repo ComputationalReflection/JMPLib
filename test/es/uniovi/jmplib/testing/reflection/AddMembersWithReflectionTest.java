@@ -346,63 +346,63 @@ public class AddMembersWithReflectionTest {
         }
     }
 
-    @Ignore
-    @SuppressWarnings("unchecked")
-    @Test
-    public void testReplaceMethodArray() {
-        jmplib.reflect.Field f1 = new jmplib.reflect.Field(Modifier.PUBLIC, double.class, "field1", "10.0");
-        jmplib.reflect.Field f2 = new jmplib.reflect.Field(Modifier.PUBLIC, double.class, "field2", "20.0");
-        jmplib.reflect.Field f3 = new jmplib.reflect.Field(Modifier.PUBLIC, double.class, "field3", "30.0");
-
-        jmplib.reflect.Method m1 = null;
-        jmplib.reflect.Method m2 = null;
-        jmplib.reflect.Method m3 = null;
-
-        jmplib.reflect.Method mr1 = null;
-        jmplib.reflect.Method mr2 = null;
-        jmplib.reflect.Method mr3 = null;
-
-        try {
-            m1 = new jmplib.reflect.Method("getField1", MethodType.methodType(int.class));
-            m2 = new jmplib.reflect.Method("getField2", MethodType.methodType(int.class));
-            m3 = new jmplib.reflect.Method("getField3", MethodType.methodType(int.class));
-
-            mr1 = new jmplib.reflect.Method("getField1", MethodType.methodType(double.class), "return (double)field1;");
-            mr2 = new jmplib.reflect.Method("getField2", MethodType.methodType(double.class), "return (double)field2;");
-            mr3 = new jmplib.reflect.Method("getField3", MethodType.methodType(double.class), "return (double)field3;");
-        } catch (StructuralIntercessionException e1) {
-            fail();
-        }
-
-        HashMap<jmplib.reflect.Method, jmplib.reflect.Method> map = new HashMap<>();
-
-        map.put(m1, mr1);
-        map.put(m2, mr2);
-        map.put(m3, mr3);
-
-        try {
-            Intercessor.replaceMethod(DestinationClassBulk4.class, map);
-            Intercessor.replaceField(DestinationClassBulk4.class, f1, f2, f3);
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail();
-        }
-
-        DestinationClassBulk4 obj = new DestinationClassBulk4();
-
-        for (int i = 0; i < 3; i++) {
-            Function<DestinationClassBulk4, Double> dfield;
-            try {
-                dfield = Evaluator.getMethodInvoker(DestinationClassBulk4.class, "getField" + (i + 1),
-                        new MemberInvokerData<>(Function.class, DestinationClassBulk4.class, Double.class));
-                double out = dfield.apply(obj);
-                assertTrue(out == (10.0 * (i + 1)));
-            } catch (StructuralIntercessionException e) {
-                fail();
-            }
-
-        }
-    }
+//    @Ignore
+//    @SuppressWarnings("unchecked")
+//    @Test
+//    public void testReplaceMethodArray() {
+//        jmplib.reflect.Field f1 = new jmplib.reflect.Field(Modifier.PUBLIC, double.class, "field1", "10.0");
+//        jmplib.reflect.Field f2 = new jmplib.reflect.Field(Modifier.PUBLIC, double.class, "field2", "20.0");
+//        jmplib.reflect.Field f3 = new jmplib.reflect.Field(Modifier.PUBLIC, double.class, "field3", "30.0");
+//
+//        jmplib.reflect.Method m1 = null;
+//        jmplib.reflect.Method m2 = null;
+//        jmplib.reflect.Method m3 = null;
+//
+//        jmplib.reflect.Method mr1 = null;
+//        jmplib.reflect.Method mr2 = null;
+//        jmplib.reflect.Method mr3 = null;
+//
+//        try {
+//            m1 = new jmplib.reflect.Method("getField1", MethodType.methodType(int.class));
+//            m2 = new jmplib.reflect.Method("getField2", MethodType.methodType(int.class));
+//            m3 = new jmplib.reflect.Method("getField3", MethodType.methodType(int.class));
+//
+//            mr1 = new jmplib.reflect.Method("getField1", MethodType.methodType(double.class), "return (double)field1;");
+//            mr2 = new jmplib.reflect.Method("getField2", MethodType.methodType(double.class), "return (double)field2;");
+//            mr3 = new jmplib.reflect.Method("getField3", MethodType.methodType(double.class), "return (double)field3;");
+//        } catch (StructuralIntercessionException e1) {
+//            fail();
+//        }
+//
+//        HashMap<jmplib.reflect.Method, jmplib.reflect.Method> map = new HashMap<>();
+//
+//        map.put(m1, mr1);
+//        map.put(m2, mr2);
+//        map.put(m3, mr3);
+//
+//        try {
+//            Intercessor.replaceMethod(DestinationClassBulk4.class, map);
+//            Intercessor.replaceField(DestinationClassBulk4.class, f1, f2, f3);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            fail();
+//        }
+//
+//        DestinationClassBulk4 obj = new DestinationClassBulk4();
+//
+//        for (int i = 0; i < 3; i++) {
+//            Function<DestinationClassBulk4, Double> dfield;
+//            try {
+//                dfield = Evaluator.getMethodInvoker(DestinationClassBulk4.class, "getField" + (i + 1),
+//                        new MemberInvokerData<>(Function.class, DestinationClassBulk4.class, Double.class));
+//                double out = dfield.apply(obj);
+//                assertTrue(out == (10.0 * (i + 1)));
+//            } catch (StructuralIntercessionException e) {
+//                fail();
+//            }
+//
+//        }
+//    }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Test

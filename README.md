@@ -2,6 +2,23 @@
 
 Dynamic languages are widely used due to the flexibility needed in some applications or systems. Therefore, dynamic language metaprogramming features have been incorporated gradually to statically-typed languages. Our work is aimed to improve the flexibility of Java language without modifying the Java Virtual Machine. We developed a library that allows Java language to support two types of metaprogramming features: 1) structural intercession y 2) dynamic code evaluation. This was achieved using class versioning, code instrumentation and Hot-Swapping. In conclusion, the library allows programmers to use these two functionalities in new or legacy code to improve its runtime flexibility.
 
+###V1.1.1
+
+This minor revision adds a new agent parameter enabling the replacement of IL instructions that use the isinstance operators and perform casts. This way, dynamic changes to the implemented interfaces of a class can be taken into account when performing these operations. This feature is enabled by default. To disable it, pass the following parameter to the agent: disable_is_instance.
+
+The feature automatically converts code like: ```java object instanceof Comparable```
+
+In: ```java Introspector.instanceOf(object, Comparable.class);```
+
+Additionally, code like: ```java (Comparable)object;```
+Now is turned into: ```java (Comparable)Introspector.cast(Comparable.class, object);```
+
+This feaure works both in user supplied code and also in Java API classes, as it is implemented with the ASM library and therefore source code is not needed. However, when trying to apply these features with Java classes the command line must be modified, as JMPLib classes are loaded with a different ClassLoader than the classes in the Java API. This modification loads a JMPLib functionality wrapper with the same ClassLoader as the Java API classes, enabling the modified code to call the JMPLib operations. The wrapper just calls the proper JMPLib class with the correct classloader so the functionality is accessible from them. Therefore, the command line options to use this functionality from the Java API is:
+
+```java -Xbootclasspath/a:./lib/jmplib-reflect.jar -javaagent:./lib/jmplib.jar```
+
+The wrapper jar file is in the /lib directory of the sources. The source code of the wrapper is in the JMPLib source wrapper/ folder.
+
 ## Sources and binaries
 
 The last stable version of the source code and its binaries are available in the [releases](https://github.com/ComputationalReflection/JMPLib/releases) section. The previous version of this project is available in this [previous release](https://github.com/ilagartos/jmplib/releases/) repository.

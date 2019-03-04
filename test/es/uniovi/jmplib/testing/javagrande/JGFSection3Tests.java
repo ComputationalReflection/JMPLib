@@ -36,7 +36,6 @@ public class JGFSection3Tests {
         try {
             JGFInstrumentor.printHeader(3, size);
 
-
             es.uniovi.jmplib.testing.javagrande.euler_meta.JGFEulerBench ebmeta =
                     new es.uniovi.jmplib.testing.javagrande.euler_meta.JGFEulerBench();
             ebmeta.JGFrun(size);
@@ -46,17 +45,13 @@ public class JGFSection3Tests {
             eb.JGFrun(size);
 
 
-
-
             es.uniovi.jmplib.testing.javagrande.moldyn.JGFMolDynBench mdb =
                     new es.uniovi.jmplib.testing.javagrande.moldyn.JGFMolDynBench();
             mdb.JGFrun(size);
 
-
             es.uniovi.jmplib.testing.javagrande.moldyn_meta.JGFMolDynBench mdbmeta =
                     new es.uniovi.jmplib.testing.javagrande.moldyn_meta.JGFMolDynBench();
             mdbmeta.JGFrun(size);
-
 
 
             es.uniovi.jmplib.testing.javagrande.montecarlo_meta.JGFMonteCarloBench mcbmeta =
@@ -67,7 +62,6 @@ public class JGFSection3Tests {
             es.uniovi.jmplib.testing.javagrande.montecarlo.JGFMonteCarloBench mcb =
                     new es.uniovi.jmplib.testing.javagrande.montecarlo.JGFMonteCarloBench();
             mcb.JGFrun(size);
-
 
 
             es.uniovi.jmplib.testing.javagrande.search.JGFSearchBench sb =
